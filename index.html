@@ -1,0 +1,911 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Encuesta sobre salidas de montaña — Tesis UTDT</title>
+<style>
+  :root{
+    --tinta:#1a1a18; --suave:#5c5c56; --linea:#dcdcd4; --fondo:#faf9f6;
+    --papel:#ffffff; --acento:#2d5f4f; --acento-claro:#eaf2ee; --alerta:#8a4b2a;
+    color-scheme: light;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--fondo);color:var(--tinta);
+    font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+  .marco{max-width:680px;margin:0 auto;padding:20px 18px 60px}
+  h1{font-size:1.45rem;line-height:1.25;margin:.2em 0 .4em;font-weight:650}
+  h2{font-size:1.1rem;margin:1.6em 0 .5em;font-weight:650}
+  p{margin:.6em 0}
+  .chico{font-size:.86rem;color:var(--suave)}
+  .tarjeta{background:var(--papel);border:1px solid var(--linea);border-radius:12px;
+    padding:18px;margin:14px 0}
+  .progreso{position:sticky;top:env(safe-area-inset-top,0);z-index:5;background:var(--fondo);
+    padding:10px 0 8px;border-bottom:1px solid var(--linea);margin-bottom:6px}
+  .barra{height:5px;background:var(--linea);border-radius:3px;overflow:hidden}
+  .barra > i{display:block;height:100%;background:var(--acento);width:0;transition:width .25s}
+  label{display:block;margin:.5em 0}
+  input[type=number],input[type=text],select{width:100%;padding:11px 12px;font-size:1rem;
+    border:1px solid var(--linea);border-radius:8px;background:var(--papel);color:var(--tinta)}
+  .opcion{display:flex;gap:10px;align-items:flex-start;padding:11px 13px;border:1px solid var(--linea);
+    border-radius:9px;margin:7px 0;cursor:pointer;background:var(--papel)}
+  .opcion:hover{border-color:var(--acento)}
+  .opcion input{margin-top:3px;flex:0 0 auto}
+  .opcion.sel{border-color:var(--acento);background:var(--acento-claro)}
+  button{font:inherit;font-weight:600;padding:13px 22px;border-radius:9px;border:1px solid var(--acento);
+    background:var(--acento);color:#fff;cursor:pointer}
+  button.sec{background:transparent;color:var(--acento)}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  .botones{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  table.plan{width:100%;border-collapse:collapse;font-size:.92rem}
+  table.plan th{text-align:left;padding:7px 8px;background:#f2f1ec;font-weight:600;width:34%;
+    vertical-align:top;border-bottom:1px solid var(--linea)}
+  table.plan td{padding:7px 8px;border-bottom:1px solid var(--linea);vertical-align:top}
+  .planes{display:grid;gap:12px}
+  @media(min-width:620px){.planes{grid-template-columns:repeat(3,1fr)}}
+  .plan-box{border:1.5px solid var(--linea);border-radius:11px;overflow:hidden;background:var(--papel);
+    cursor:pointer;display:flex;flex-direction:column}
+  .plan-box:hover{border-color:var(--acento)}
+  .plan-box.sel{border-color:var(--acento);box-shadow:0 0 0 2px var(--acento-claro)}
+  .plan-cab{background:var(--acento);color:#fff;padding:9px 11px;font-weight:650;font-size:.95rem}
+  .plan-box.sel .plan-cab{background:#1f4538}
+  .plan-cuota{font-size:1.3rem;font-weight:700;padding:11px 11px 2px}
+  .plan-cuota small{font-size:.75rem;font-weight:400;color:var(--suave);display:block}
+  .plan-fila{padding:7px 11px;font-size:.87rem;border-top:1px solid #efeee9}
+  .plan-fila b{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.03em;
+    color:var(--suave);font-weight:600;margin-bottom:1px}
+  .aviso{background:#fdf6ee;border-left:3px solid var(--alerta);padding:11px 13px;
+    border-radius:0 7px 7px 0;font-size:.9rem;margin:14px 0}
+  .recordatorio{background:#f2f1ec;padding:11px 13px;border-radius:8px;font-size:.88rem;
+    color:var(--suave);margin:14px 0}
+  .escala{display:flex;gap:5px;flex-wrap:wrap;margin:10px 0}
+  .escala button{flex:1 1 auto;min-width:38px;padding:11px 0;background:var(--papel);
+    color:var(--tinta);border:1px solid var(--linea);font-weight:500}
+  .escala button.sel{background:var(--acento);color:#fff;border-color:var(--acento)}
+  .err{color:var(--alerta);font-size:.88rem;margin-top:8px;font-weight:600}
+  code.codigo{display:block;background:#f2f1ec;padding:14px;border-radius:8px;font-size:.8rem;
+    word-break:break-all;margin:12px 0;max-height:190px;overflow:auto}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="marco">
+  <div class="progreso" id="progreso" hidden>
+    <div class="barra"><i id="barra"></i></div>
+    <div class="chico" style="margin-top:5px;display:flex;justify-content:space-between;gap:10px">
+      <span id="paso-txt"></span>
+      <!-- Tiene que estar en TODOS los pasos y no solo en la portada: al recargar, la
+           página retoma donde quedó y la portada no se vuelve a ver nunca. Si el teléfono
+           se presta a otra persona, esta es su única salida. -->
+      <a href="#" id="reinicio" onclick="confirmarReinicio(event)"
+         style="color:var(--suave);text-decoration:underline;white-space:nowrap">¿No sos vos?</a>
+    </div>
+  </div>
+  <div id="app"></div>
+</div>
+
+<script>
+/* =========================================================================
+   Encuesta del Checkpoint 3 — tesis MiM + AI (UTDT), Martín Laborda.
+
+   Tres cosas que esta página hace y un formulario común no:
+   1. Sirve una VERSION DISTINTA del experimento a cada persona, tomada de los
+      30 bloques D-eficientes generados por 07-Analisis/15_diseno_conjoint.py.
+      Sin eso las utilidades parciales no se pueden estimar.
+   2. Aleatoriza el orden de las tareas y la posición de los planes en pantalla,
+      para que el orden no se confunda con la preferencia.
+   3. Guarda el progreso en el navegador, así una persona que cierra la pestaña
+      no empieza de nuevo (y no se pierde la respuesta a mitad de camino).
+
+   El envío tiene DOS vias a propósito: si el endpoint falla, la página muestra
+   la respuesta como texto para copiar y pegar. Una respuesta completa que se
+   pierde por un error de red es una respuesta que hay que volver a conseguir.
+   ========================================================================= */
+
+const CONFIG = {
+  /* Dónde se guardan las respuestas. La tabla es append-only: la clave pública
+     solo puede INSERTAR, no leer ni modificar nada, así que publicarla acá no
+     expone ninguna respuesta de nadie. Verificado contra la base. */
+  endpoint: "https://xbzkxqobxcioanjqvbfa.supabase.co/rest/v1/tesis_encuesta_respuestas",
+  apikey: "sb_publishable_qIKtBUYy-Slm2gNnnxX28g_8u3TtK_X",
+  version: "cp3-2026-10-13"
+};
+
+const DISENO = {"atributos":[{"nombre":"cuota","niveles":["$35.000","$70.000","$130.000","$240.000"]},{"nombre":"cubre","niveles":["2 salidas de fin de semana al año","3 de fin de semana, o 1 travesía de 5 a 7 días","5 de fin de semana, o 2 travesías"]},{"nombre":"garantia","niveles":["si no junta gente se cancela y te devuelven la plata","si no junta gente te reprograman con lugar asegurado","la salida se hace igual, aunque no junte gente"]},{"nombre":"grupo","niveles":["hasta 8 personas con 2 guías","hasta 12 personas con 2 guías","hasta 16 personas con 2 guías"]},{"nombre":"destinos","niveles":["sierras de Córdoba y Buenos Aires","sierras, Norte y Mendoza","sierras, Norte, Mendoza, Patagonia y países limítrofes"]},{"nombre":"reserva","niveles":["elegís cualquier fecha","en fines de semana largos el cupo de socios es limitado","solo podés reservar dentro de los 30 días previos"]}],"nAlt":3,"fijas":[[[2,0,2,0,1,2],[1,1,1,1,1,0],[2,0,2,2,1,2]],[[2,2,2,1,1,2],[3,2,0,1,0,2],[1,1,0,2,0,0]]],"bloques":[[[[1,2,2,1,0,1],[0,1,0,2,2,2],[2,0,1,0,1,0]],[[3,2,1,2,0,2],[0,0,2,0,2,1],[1,1,0,1,1,0]],[[1,0,1,2,2,0],[3,2,2,1,1,2],[2,1,0,0,0,1]],[[0,2,0,0,0,0],[2,0,1,1,2,2],[3,1,1,2,1,1]],[[3,0,0,1,2,1],[2,1,2,2,0,2],[0,2,1,0,1,0]],[[1,2,0,0,1,2],[3,1,2,2,2,0],[0,0,1,1,0,1]],[[1,1,1,0,0,1],[2,2,2,1,2,0],[0,0,0,2,1,2]],[[1,1,1,1,2,2],[2,2,0,2,1,1],[3,0,2,0,0,0]],[[0,2,1,2,2,1],[3,1,0,1,0,0],[1,0,2,0,1,2]],[[0,1,2,1,1,1],[1,0,0,2,0,0],[3,2,1,0,2,2]]],[[[0,2,1,2,0,0],[1,0,0,0,2,1],[2,1,2,1,1,2]],[[3,1,0,2,2,0],[2,2,2,0,0,2],[0,0,1,1,1,1]],[[1,0,1,2,0,2],[0,2,2,0,2,1],[2,1,0,1,1,0]],[[2,1,2,2,0,1],[3,2,1,1,2,0],[0,0,0,0,1,2]],[[2,1,1,0,2,2],[3,0,0,1,0,0],[1,2,2,2,1,1]],[[1,1,0,1,0,1],[2,2,1,0,1,0],[3,0,2,2,2,2]],[[0,0,2,2,1,0],[1,1,1,0,0,2],[2,2,0,1,2,1]],[[3,0,2,0,0,1],[0,1,1,1,2,2],[1,2,0,2,1,0]],[[0,1,2,0,0,0],[2,0,1,2,2,1],[3,2,0,1,1,2]],[[1,0,2,1,2,0],[3,1,1,0,1,1],[0,2,0,2,0,2]]],[[[0,0,0,0,2,2],[1,2,1,1,1,1],[3,1,2,2,0,0]],[[3,2,0,2,2,1],[1,1,2,1,1,2],[0,1,1,0,0,0]],[[0,1,2,1,0,1],[2,0,0,0,2,0],[1,2,1,2,1,2]],[[0,2,2,2,2,0],[3,1,1,0,1,2],[2,0,0,1,0,1]],[[1,0,2,0,0,1],[3,1,0,1,1,0],[2,2,1,2,2,2]],[[0,0,1,2,1,1],[2,2,2,0,0,2],[1,1,0,1,2,0]],[[1,1,2,2,2,1],[3,2,0,0,1,1],[2,0,1,1,0,0]],[[3,0,2,1,2,2],[2,1,0,2,1,1],[1,2,1,0,0,0]],[[2,1,1,1,2,1],[1,0,0,2,0,2],[0,2,2,0,1,0]],[[2,0,2,2,1,0],[3,1,1,0,2,1],[0,2,0,1,0,2]]],[[[0,0,1,0,1,2],[1,2,2,2,0,0],[3,1,0,1,2,1]],[[2,0,0,2,2,2],[3,2,2,0,0,1],[0,1,1,1,1,0]],[[0,2,0,0,2,0],[1,1,2,2,1,2],[3,0,1,1,0,1]],[[2,1,2,0,1,0],[3,0,1,1,2,2],[1,0,0,2,0,1]],[[2,0,0,0,1,1],[3,1,1,2,1,0],[0,2,2,1,0,2]],[[1,2,1,0,2,2],[2,1,0,1,0,0],[0,0,2,2,1,1]],[[2,2,2,1,1,2],[0,0,0,2,0,0],[1,1,1,0,2,1]],[[0,1,2,1,2,1],[2,0,1,0,0,0],[3,2,0,2,1,2]],[[1,0,2,1,1,0],[2,2,1,2,2,1],[3,1,0,0,0,2]],[[3,0,2,0,2,0],[1,2,0,1,1,1],[2,1,1,2,0,2]]],[[[1,0,0,1,2,0],[3,1,1,2,0,1],[2,2,2,0,1,2]],[[2,1,2,2,2,2],[0,0,1,1,1,1],[1,2,0,0,0,0]],[[3,2,1,1,0,2],[1,1,2,2,2,0],[2,0,0,0,1,1]],[[0,1,2,1,1,2],[2,0,1,2,0,0],[1,2,0,0,2,1]],[[3,2,2,2,1,1],[2,1,0,1,0,2],[0,0,1,0,2,0]],[[3,0,2,1,2,1],[0,1,0,0,0,0],[1,2,1,2,1,2]],[[3,0,0,0,2,2],[1,1,1,1,1,1],[0,2,2,1,0,0]],[[3,1,0,1,1,0],[2,0,2,2,0,1],[0,2,1,0,2,2]],[[3,1,1,0,1,0],[0,2,0,2,2,1],[1,0,2,1,0,2]],[[2,2,1,1,2,0],[1,1,2,0,0,1],[0,0,0,2,1,2]]],[[[2,1,1,2,0,1],[0,2,2,0,1,2],[3,0,0,1,2,0]],[[3,1,2,0,0,0],[2,2,1,1,1,2],[1,2,0,2,2,1]],[[0,1,0,1,0,2],[2,0,2,2,1,0],[3,2,1,0,2,1]],[[0,2,1,2,0,1],[1,1,0,1,1,0],[3,0,2,0,2,2]],[[3,0,1,2,1,0],[2,1,0,0,2,2],[1,2,2,1,0,1]],[[3,1,2,2,1,1],[0,0,1,1,2,2],[2,2,0,0,0,0]],[[0,1,2,1,1,1],[1,0,1,0,0,0],[3,2,0,2,2,2]],[[2,1,1,1,2,1],[0,2,0,0,1,0],[1,0,2,2,0,2]],[[0,1,2,2,2,0],[2,0,0,0,1,1],[3,2,1,1,0,2]],[[1,1,1,0,1,2],[0,0,0,2,0,1],[2,2,2,1,2,0]]],[[[0,1,0,2,1,0],[2,0,2,1,2,2],[1,2,1,0,0,1]],[[3,0,1,1,0,0],[2,0,0,0,1,1],[1,1,2,0,2,2]],[[2,1,0,1,0,0],[1,0,1,2,2,1],[0,2,2,0,1,2]],[[1,2,0,1,2,0],[3,1,2,0,0,1],[0,0,1,2,1,2]],[[2,2,2,2,0,0],[3,0,0,0,1,2],[0,1,1,1,2,1]],[[3,1,0,2,0,2],[2,2,1,0,1,0],[0,0,2,1,2,1]],[[3,0,0,0,2,0],[2,1,2,2,1,1],[0,2,1,1,0,2]],[[1,1,0,1,1,1],[0,0,2,0,0,0],[3,2,1,2,2,2]],[[0,1,1,0,2,0],[1,0,0,2,0,2],[3,2,2,1,1,1]],[[2,1,1,0,0,2],[1,0,2,1,1,0],[0,2,0,2,2,1]]],[[[3,1,1,1,1,1],[2,2,0,0,2,0],[1,0,2,2,0,2]],[[0,1,0,0,2,1],[1,2,2,1,1,0],[3,0,1,2,0,2]],[[2,1,2,0,1,2],[1,2,1,2,2,1],[0,0,0,1,0,0]],[[2,0,1,1,2,1],[3,2,2,0,0,2],[1,1,0,2,1,0]],[[2,2,1,1,0,0],[0,1,2,2,2,2],[1,0,0,0,1,1]],[[1,2,0,1,0,2],[0,0,1,2,1,0],[3,1,2,0,2,1]],[[2,1,0,2,0,1],[1,0,2,1,2,0],[0,2,1,0,1,2]],[[2,0,2,2,1,1],[3,2,0,1,2,2],[1,1,1,0,0,0]],[[2,0,0,0,1,2],[3,2,1,2,2,0],[0,1,2,1,0,1]],[[0,2,2,2,0,1],[1,1,1,1,2,2],[3,0,0,0,1,0]]],[[[0,2,2,1,0,1],[1,0,0,0,1,2],[3,1,1,2,2,0]],[[1,1,2,0,1,2],[0,0,0,2,0,1],[3,2,1,1,2,0]],[[0,2,1,0,1,0],[1,0,2,1,2,1],[3,1,0,2,0,2]],[[0,0,0,2,2,2],[2,2,1,0,0,1],[3,1,2,1,1,0]],[[3,2,0,0,2,1],[2,1,2,2,1,1],[1,0,1,1,0,0]],[[2,0,0,0,2,0],[0,1,0,1,1,1],[1,2,2,2,0,2]],[[0,0,2,0,0,0],[1,1,1,2,2,1],[2,2,0,1,1,2]],[[3,0,2,0,0,1],[1,2,0,2,1,0],[2,1,1,1,2,2]],[[2,2,2,2,2,0],[1,1,0,0,0,1],[3,0,1,1,1,2]],[[2,1,0,1,0,0],[3,0,1,2,1,1],[0,2,2,0,2,2]]],[[[2,1,1,0,1,0],[3,2,1,1,2,2],[0,0,2,2,0,1]],[[2,1,1,2,0,1],[0,2,2,0,1,2],[1,0,0,1,2,0]],[[0,1,0,2,0,2],[1,2,2,0,2,0],[3,0,1,1,1,1]],[[0,0,1,0,2,2],[2,2,0,1,0,0],[1,1,2,2,1,1]],[[1,2,1,2,0,2],[2,0,0,0,2,1],[0,2,2,1,1,0]],[[3,2,0,0,0,1],[2,0,1,2,1,0],[1,1,2,1,2,2]],[[3,1,2,0,0,0],[1,0,0,1,1,2],[0,2,1,2,2,1]],[[2,2,0,0,1,2],[3,0,2,2,2,0],[0,1,1,1,0,1]],[[1,0,1,0,0,0],[2,2,2,1,2,1],[3,1,0,2,1,2]],[[1,2,1,0,1,1],[0,1,0,2,2,0],[2,0,2,1,0,2]]],[[[1,2,1,0,0,2],[0,1,2,1,1,0],[2,0,0,2,2,1]],[[0,0,0,0,0,2],[3,2,2,1,1,1],[1,1,1,2,2,0]],[[1,0,2,2,0,1],[2,2,0,1,1,2],[3,1,1,0,2,0]],[[0,2,1,2,0,1],[3,1,0,1,1,2],[1,0,2,0,2,0]],[[2,1,2,1,0,2],[0,0,1,2,1,0],[3,2,0,0,2,1]],[[1,1,0,2,0,2],[3,0,2,0,1,1],[2,2,1,1,2,0]],[[2,0,2,0,0,0],[0,1,0,1,2,1],[3,2,1,2,1,2]],[[1,1,1,1,1,1],[0,2,2,0,2,2],[3,0,0,2,0,0]],[[1,0,1,1,2,2],[2,1,1,0,1,1],[3,2,2,2,0,0]],[[1,2,0,0,1,0],[3,0,1,1,0,1],[2,1,2,2,2,2]]],[[[1,2,0,2,0,1],[3,1,2,1,1,1],[2,0,1,0,2,0]],[[2,1,0,2,2,2],[3,0,2,0,0,1],[1,2,1,1,1,0]],[[0,2,2,0,1,2],[1,0,0,1,2,1],[3,1,1,2,0,0]],[[2,1,1,1,1,1],[1,0,2,0,2,2],[3,2,0,2,0,0]],[[3,0,1,2,1,2],[0,1,0,0,2,1],[2,2,2,1,0,0]],[[2,0,0,1,0,2],[0,2,1,2,2,1],[1,1,2,0,1,0]],[[2,2,0,0,1,1],[0,0,0,1,2,0],[1,1,1,2,0,2]],[[0,0,1,1,0,2],[3,2,0,0,1,0],[2,1,2,2,2,1]],[[0,1,1,0,0,0],[1,0,0,2,1,1],[3,2,2,1,2,2]],[[3,2,1,0,2,1],[1,1,0,1,0,2],[0,0,2,2,1,0]]],[[[0,1,1,1,2,2],[3,2,0,0,0,1],[1,0,2,2,1,0]],[[3,1,2,2,2,2],[2,2,1,0,0,0],[0,0,0,1,0,1]],[[2,2,0,0,2,2],[3,0,2,2,0,1],[1,1,1,1,1,0]],[[1,0,1,2,2,1],[3,2,0,1,1,0],[0,1,2,0,0,2]],[[1,2,2,0,2,1],[3,0,1,1,0,2],[2,1,0,2,1,0]],[[2,1,2,1,0,1],[3,2,1,2,1,2],[0,0,0,0,2,0]],[[2,0,2,1,1,1],[1,2,0,2,0,2],[3,1,1,0,2,0]],[[1,2,1,1,2,0],[2,1,0,2,0,1],[0,0,2,0,1,2]],[[0,2,1,2,1,1],[2,0,0,1,2,2],[1,1,2,0,0,0]],[[0,2,2,2,2,0],[1,1,0,0,1,1],[2,0,1,0,0,2]]],[[[3,0,1,0,0,1],[2,1,2,1,2,2],[1,2,0,2,1,0]],[[3,1,1,2,2,0],[2,0,2,1,1,1],[0,2,0,0,0,2]],[[0,2,2,0,2,1],[3,1,0,1,1,0],[1,0,1,2,0,2]],[[3,2,1,1,2,0],[2,0,0,0,2,1],[0,1,2,2,1,2]],[[3,0,2,0,1,2],[2,2,0,2,2,0],[0,1,1,1,0,1]],[[1,1,2,2,2,1],[0,0,0,1,0,0],[2,2,1,0,1,2]],[[1,1,2,0,0,0],[2,0,1,2,1,1],[3,2,0,1,2,2]],[[2,1,0,0,0,2],[1,2,1,1,1,1],[0,0,2,2,2,0]],[[0,1,1,0,1,0],[1,0,0,1,2,2],[3,2,2,2,0,1]],[[3,1,0,2,1,1],[2,2,2,1,0,0],[1,0,1,0,2,2]]],[[[2,1,1,0,1,0],[3,2,2,1,2,2],[1,0,0,2,0,1]],[[0,1,1,2,2,2],[2,2,2,0,0,0],[3,0,0,1,1,1]],[[3,2,1,0,0,1],[2,1,0,2,2,1],[0,0,2,1,1,0]],[[1,0,2,0,2,2],[0,1,0,1,1,1],[3,2,1,2,0,0]],[[2,1,1,1,0,2],[1,2,0,0,1,0],[0,0,2,2,2,1]],[[1,2,1,2,1,2],[3,1,0,0,2,0],[2,0,2,1,0,1]],[[1,0,0,1,0,0],[0,2,1,0,2,1],[3,1,2,2,1,2]],[[1,1,2,1,0,1],[0,2,0,0,1,2],[2,0,1,2,2,0]],[[2,2,2,2,1,1],[0,0,0,0,0,2],[1,1,1,1,2,0]],[[3,0,1,0,1,1],[0,1,2,2,0,0],[2,2,0,1,2,2]]],[[[0,2,0,2,0,0],[1,0,1,1,1,2],[2,1,2,0,2,1]],[[1,1,0,2,2,1],[2,2,2,1,1,2],[3,0,1,0,0,0]],[[1,2,2,0,0,1],[3,0,0,2,1,2],[0,1,1,1,2,0]],[[1,0,2,2,2,0],[2,2,1,0,1,1],[0,1,0,1,0,2]],[[1,1,0,1,1,0],[0,0,2,0,2,2],[3,2,1,2,0,1]],[[2,0,0,1,0,1],[3,1,1,0,1,2],[0,2,2,2,1,0]],[[3,2,0,0,2,0],[2,1,2,2,0,2],[0,0,1,1,1,1]],[[2,2,1,1,2,2],[0,1,0,2,1,1],[1,0,2,0,0,0]],[[1,2,1,2,2,2],[2,0,0,0,1,0],[3,1,2,1,0,1]],[[2,1,1,2,0,0],[3,0,2,1,2,1],[1,2,0,0,0,2]]],[[[1,1,2,2,0,0],[2,0,1,0,1,2],[0,2,0,1,2,1]],[[3,2,2,1,1,1],[2,0,1,2,2,0],[0,1,0,0,0,2]],[[2,2,0,2,1,1],[0,0,2,0,2,0],[1,1,1,1,0,2]],[[0,1,1,1,1,1],[3,2,2,0,2,2],[1,0,0,2,1,0]],[[0,0,2,0,0,1],[2,2,1,1,1,0],[3,1,0,2,2,2]],[[2,0,2,1,0,2],[1,2,0,2,2,1],[3,1,1,0,1,0]],[[2,1,0,1,2,0],[1,2,2,0,1,2],[3,0,1,2,0,1]],[[2,1,2,0,2,1],[0,2,1,2,0,0],[3,0,0,1,1,2]],[[1,0,1,1,2,1],[3,2,0,0,0,0],[0,1,2,2,1,2]],[[0,2,1,2,2,2],[3,0,2,1,1,0],[2,1,0,0,0,1]]],[[[0,0,2,2,1,2],[2,2,0,1,0,0],[3,1,1,0,2,1]],[[2,1,1,2,1,1],[3,2,2,1,2,0],[0,0,0,0,0,2]],[[0,1,2,1,0,1],[1,0,1,0,1,0],[2,2,0,2,2,2]],[[3,0,0,2,1,0],[0,2,2,0,2,1],[2,1,1,1,0,2]],[[1,1,0,1,2,2],[0,2,1,0,1,0],[3,0,2,2,0,1]],[[1,1,2,2,0,0],[3,2,1,1,1,2],[2,0,0,0,2,1]],[[1,2,0,2,0,1],[0,0,1,1,2,2],[2,1,2,0,1,0]],[[3,1,2,0,0,2],[0,2,0,2,1,1],[1,0,1,1,2,0]],[[3,1,0,1,1,1],[1,2,2,0,2,2],[2,0,1,2,0,0]],[[0,1,0,2,2,0],[3,2,1,0,0,2],[2,0,2,1,1,1]]],[[[3,0,2,1,2,0],[0,1,1,2,0,2],[1,2,0,2,1,1]],[[1,2,2,0,1,0],[2,1,1,1,0,1],[0,0,0,2,2,2]],[[2,0,0,0,2,1],[1,2,2,2,0,2],[3,1,1,1,1,0]],[[3,2,0,0,0,1],[1,1,2,2,2,0],[0,0,1,1,1,2]],[[3,2,1,2,2,2],[0,0,2,0,0,0],[1,1,0,1,1,1]],[[1,0,1,2,0,1],[2,1,2,0,1,2],[0,2,0,1,2,0]],[[0,1,0,2,1,0],[2,2,2,1,2,1],[1,0,1,0,0,2]],[[2,2,0,1,0,0],[3,0,2,2,1,2],[0,1,1,0,2,1]],[[3,0,2,2,0,1],[1,1,0,1,2,2],[2,2,1,0,1,0]],[[2,0,1,2,2,0],[3,1,0,0,0,2],[0,2,2,1,1,1]]],[[[3,0,0,2,0,1],[1,2,2,0,2,0],[0,1,2,1,1,2]],[[1,0,0,1,1,1],[3,1,2,0,0,0],[2,2,1,2,2,2]],[[0,2,1,2,1,1],[3,0,0,0,2,2],[2,1,2,1,0,2]],[[3,1,0,2,1,2],[2,2,2,0,0,1],[1,0,1,1,2,0]],[[0,0,1,0,0,2],[3,2,2,2,1,0],[2,1,0,1,2,1]],[[2,0,0,2,0,0],[3,2,2,1,2,2],[1,1,1,0,1,1]],[[1,1,2,2,0,1],[3,0,1,0,1,0],[2,2,0,1,1,2]],[[1,0,2,2,1,2],[3,2,1,1,0,1],[0,1,0,0,2,0]],[[2,1,1,1,1,0],[0,0,2,2,2,1],[1,2,0,0,0,2]],[[0,2,0,1,0,0],[2,0,2,0,1,1],[1,1,1,2,2,2]]],[[[3,1,2,2,0,0],[0,2,1,1,1,1],[1,0,0,0,2,2]],[[2,0,1,2,2,1],[3,1,0,1,1,2],[0,2,2,0,0,0]],[[2,2,2,0,2,2],[1,1,0,2,0,1],[0,0,1,1,1,0]],[[1,1,1,0,1,1],[2,0,0,1,0,0],[0,2,2,2,2,2]],[[1,1,2,1,2,1],[3,2,1,0,0,2],[0,0,0,2,1,2]],[[0,0,2,0,0,1],[1,2,0,2,1,0],[2,1,1,1,2,2]],[[1,0,1,0,0,2],[2,1,2,2,1,0],[3,2,0,1,2,1]],[[1,2,1,1,2,0],[0,1,0,2,0,2],[3,0,2,0,1,1]],[[3,0,1,2,2,0],[2,2,0,0,1,1],[0,1,2,1,0,2]],[[2,2,1,2,0,1],[0,1,0,0,2,0],[1,0,2,1,1,2]]],[[[0,0,1,1,1,2],[1,1,2,0,0,2],[2,2,0,2,2,1]],[[2,0,2,2,1,0],[0,2,0,1,0,2],[3,1,1,0,2,1]],[[3,2,1,1,0,2],[1,1,0,0,1,0],[0,0,2,1,2,1]],[[3,2,2,2,0,0],[0,0,1,0,2,2],[2,1,0,1,1,2]],[[1,2,1,1,2,0],[0,1,0,2,0,2],[3,0,2,0,1,1]],[[2,2,2,0,2,2],[3,0,0,1,1,0],[0,1,1,2,0,1]],[[1,2,0,1,1,1],[3,1,2,2,2,2],[2,0,1,0,0,0]],[[1,0,0,2,2,2],[0,2,2,0,1,0],[2,1,1,1,0,1]],[[3,1,0,1,2,0],[1,0,1,2,1,1],[2,2,2,0,0,2]],[[1,1,2,1,2,0],[3,0,0,0,0,1],[2,2,1,2,1,2]]],[[[2,2,1,0,2,2],[3,1,0,2,0,0],[1,0,2,1,1,1]],[[0,0,0,1,0,2],[3,2,1,0,1,0],[2,1,2,2,2,1]],[[3,0,1,1,1,1],[0,2,2,2,0,2],[1,1,0,0,2,0]],[[3,1,2,0,0,1],[2,2,0,2,1,0],[1,0,1,1,2,2]],[[2,1,1,1,0,0],[1,2,0,2,1,2],[0,0,0,0,2,1]],[[0,2,0,1,2,0],[2,0,2,0,1,2],[1,1,1,2,0,1]],[[2,1,0,1,1,2],[3,0,2,0,0,0],[0,2,1,2,2,1]],[[0,0,1,2,1,1],[3,1,0,1,2,2],[1,2,2,0,0,0]],[[2,0,0,2,0,0],[3,2,2,1,2,1],[0,1,1,0,1,2]],[[2,2,0,0,0,1],[3,0,1,2,2,2],[0,1,2,1,1,0]]],[[[1,2,1,1,1,1],[0,0,0,0,2,2],[2,1,2,2,0,0]],[[3,1,1,0,2,1],[0,0,0,1,0,0],[1,2,2,2,1,2]],[[2,1,0,2,0,2],[1,0,1,1,2,0],[0,2,2,0,1,1]],[[0,1,1,1,1,2],[3,2,2,0,0,0],[1,0,0,2,2,1]],[[2,0,1,0,1,2],[3,2,0,1,0,1],[0,1,2,2,2,0]],[[2,2,1,0,0,0],[3,0,2,2,1,1],[1,1,0,1,2,2]],[[3,2,1,2,2,2],[2,0,0,1,1,0],[1,1,2,0,0,1]],[[3,0,2,1,0,2],[1,2,1,2,2,0],[2,1,0,0,1,1]],[[2,2,2,1,2,2],[0,0,1,2,0,1],[3,1,0,0,1,0]],[[2,1,2,1,2,1],[0,2,0,2,1,0],[1,0,1,0,0,2]]],[[[1,0,1,2,2,0],[2,2,0,1,1,1],[0,1,2,0,0,2]],[[2,0,0,0,0,0],[1,2,1,2,2,2],[3,1,2,1,1,1]],[[0,2,1,2,1,1],[2,0,2,1,0,0],[1,1,0,0,2,2]],[[2,2,2,2,0,1],[0,1,1,0,1,0],[3,0,0,1,2,2]],[[2,1,1,2,2,2],[1,0,2,0,1,1],[0,2,0,1,0,0]],[[1,1,1,1,0,1],[3,2,2,0,2,0],[0,0,0,2,1,2]],[[3,1,0,2,1,0],[0,0,1,1,2,1],[1,2,2,0,0,2]],[[1,2,2,1,1,0],[3,0,1,2,0,2],[2,1,0,0,2,1]],[[2,0,1,0,1,0],[0,2,2,1,2,2],[1,1,0,2,0,1]],[[3,2,1,0,0,1],[2,1,1,1,1,2],[0,0,2,2,2,0]]],[[[1,0,2,1,2,1],[0,2,0,0,0,0],[2,1,1,2,1,2]],[[0,2,0,0,2,2],[3,1,2,2,0,1],[1,0,1,1,1,0]],[[1,0,1,0,2,1],[2,2,2,1,0,2],[3,1,0,1,1,0]],[[0,1,1,1,0,2],[2,0,0,2,2,0],[3,2,2,0,1,1]],[[3,0,1,1,2,2],[1,2,2,2,0,0],[2,1,0,0,1,1]],[[2,2,0,1,2,1],[1,1,1,0,0,2],[0,0,2,2,1,0]],[[1,1,0,1,0,1],[0,0,2,0,1,2],[3,2,1,2,2,0]],[[2,1,2,0,2,0],[3,0,0,2,0,2],[0,2,1,1,1,1]],[[3,2,2,0,1,2],[0,1,1,2,2,1],[2,0,0,1,0,0]],[[1,2,0,2,1,2],[0,1,2,1,2,0],[2,0,1,0,0,1]]],[[[2,0,0,1,2,1],[0,1,2,2,0,0],[3,2,1,0,1,2]],[[2,0,2,0,1,0],[0,1,1,2,0,1],[1,2,0,1,2,2]],[[3,1,2,1,2,2],[0,2,0,2,1,0],[2,0,1,0,0,1]],[[2,2,2,2,2,1],[1,0,1,1,0,0],[0,1,0,0,1,2]],[[3,2,2,0,0,1],[0,0,1,1,1,0],[1,1,0,2,2,2]],[[3,0,0,1,0,1],[1,2,2,0,2,0],[2,1,1,2,1,2]],[[2,2,1,1,0,2],[3,1,0,0,2,0],[1,0,2,2,1,1]],[[3,0,0,2,0,2],[2,1,2,1,1,0],[0,2,1,0,2,1]],[[0,2,2,1,0,2],[1,1,0,0,1,1],[3,0,1,2,2,0]],[[3,1,1,1,1,1],[2,2,0,2,0,0],[0,0,2,0,2,2]]],[[[3,1,2,2,2,2],[2,2,1,0,1,0],[0,0,0,1,0,1]],[[3,1,0,2,0,0],[1,0,1,1,1,2],[2,2,2,0,2,1]],[[2,1,1,1,0,2],[1,2,2,2,1,1],[3,0,0,0,2,0]],[[2,1,1,2,2,1],[0,2,0,0,0,0],[3,0,2,1,1,2]],[[2,1,0,0,1,2],[3,2,1,1,2,1],[1,0,2,2,0,0]],[[1,0,0,2,1,1],[0,1,2,1,2,0],[3,2,1,0,0,2]],[[3,0,1,0,0,1],[0,1,2,1,1,0],[2,2,0,2,2,2]],[[0,0,1,2,2,2],[3,2,0,1,1,0],[1,1,2,0,0,1]],[[2,0,0,1,0,1],[1,1,1,0,2,0],[0,2,2,2,1,2]],[[1,2,0,1,2,2],[2,0,2,2,0,0],[0,1,1,0,1,1]]],[[[1,2,1,2,0,0],[0,1,2,1,1,2],[3,0,0,0,2,1]],[[0,0,1,0,0,1],[3,2,2,2,1,2],[2,1,0,1,2,0]],[[0,2,0,1,2,1],[1,1,2,0,0,2],[2,0,1,2,1,0]],[[1,1,0,2,1,1],[3,2,1,1,0,0],[2,0,2,0,2,2]],[[1,1,1,0,2,0],[2,2,2,1,0,1],[3,0,0,2,1,2]],[[0,2,2,2,2,0],[3,1,1,0,1,1],[1,0,0,1,0,2]],[[2,2,1,0,0,2],[3,1,2,2,2,1],[1,0,0,1,1,0]],[[0,1,0,0,0,0],[2,0,1,1,1,1],[1,2,2,2,2,1]],[[3,2,1,1,2,2],[2,1,0,2,0,1],[0,0,2,0,1,0]],[[3,0,2,1,0,0],[2,2,0,0,1,1],[0,1,1,2,2,2]]],[[[0,2,0,1,2,2],[1,1,2,2,1,0],[3,0,1,0,0,1]],[[1,0,0,1,0,2],[2,2,1,2,1,1],[3,1,2,0,2,0]],[[0,1,2,2,0,1],[2,0,0,0,2,0],[3,2,1,1,1,2]],[[1,2,2,1,0,0],[2,0,1,2,2,2],[0,1,0,0,1,1]],[[1,2,2,0,2,1],[2,1,0,1,1,0],[0,0,1,2,0,2]],[[1,1,0,0,1,2],[0,2,1,2,0,0],[2,0,2,1,2,1]],[[2,2,2,0,1,2],[1,1,1,2,2,1],[0,0,0,0,0,0]],[[3,1,0,1,0,1],[1,0,1,0,1,0],[0,2,2,2,2,2]],[[3,2,0,2,2,0],[2,1,1,0,0,2],[0,0,2,1,1,1]],[[2,2,0,0,0,1],[0,1,1,1,2,0],[3,0,2,2,1,2]]]],"derror":0.19616};
+
+const ATR = DISENO.atributos;
+const ETIQ = {
+  cuota:    {titulo:"Cuota mensual",     ayuda:"Lo que pagás todos los meses, viajes o no"},
+  cubre:    {titulo:"Alcanza para",      ayuda:"El crédito se junta mes a mes"},
+  garantia: {titulo:"Si no junta gente", ayuda:"Hoy, si no llega al mínimo, se cancela"},
+  grupo:    {titulo:"Tamaño del grupo",  ayuda:"Cuántas personas y cuántos guías"},
+  destinos: {titulo:"Destinos",          ayuda:"Dónde podés usar el crédito"},
+  reserva:  {titulo:"Cómo reservás",     ayuda:"Cuándo podés elegir la fecha"}
+};
+const ORDEN_MOSTRAR = ["cubre","garantia","grupo","destinos","reserva"];
+
+/* ---------------------------------------------------------------- estado */
+const LS = "encuesta-montana-utdt";
+/* El canal de reclutamiento viene en la URL (?c=pauta, ?c=red, ?c=com) y no se le
+   pregunta a la persona: preguntarlo da un dato malo, porque nadie se acuerda por dónde
+   llegó. Es el dato que sostiene la promesa metodológica de reportar por canal, que es
+   la defensa contra el sesgo de autoselección. Si falta, queda "sin_etiqueta" y se
+   reporta como tal en lugar de inventarlo. */
+function canalDeUrl(){
+  try {
+    const c = (new URLSearchParams(location.search).get("c") || "").toLowerCase();
+    return ["pauta","red","com","piloto"].includes(c) ? c : "sin_etiqueta";
+  } catch(e) { return "sin_etiqueta"; }
+}
+
+let S = cargar() || {
+  id: nuevoId(),
+  bloque: Math.floor(Math.random()*DISENO.bloques.length),
+  iniciado: new Date().toISOString(),
+  canal: canalDeUrl(),
+  /* El dispositivo se registra solo, sin preguntar: sirve para leer el abandono, que
+     en encuestas largas se concentra en teléfono. */
+  pantalla: (typeof screen !== "undefined" ? screen.width + "x" + screen.height : "?"),
+  movil: /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent || ""),
+  paso: 0,
+  r: {},            // respuestas de las preguntas
+  elecciones: [],   // una por tarea
+  orden: null,      // orden aleatorio de las tareas
+  version: CONFIG.version
+};
+/* Si alguien retoma con otro link etiquetado, el canal del primer ingreso manda. */
+if (!S.canal) { S.canal = canalDeUrl(); guardar(); }
+
+function nuevoId(){
+  return "r-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,8);
+}
+function guardar(){
+  try { localStorage.setItem(LS, JSON.stringify(S)); } catch(e){ /* modo privado */ }
+}
+function cargar(){
+  try { const x = localStorage.getItem(LS); return x ? JSON.parse(x) : null; }
+  catch(e){ return null; }
+}
+
+/* ------------------------------------------------- guardado en el servidor
+
+   Cada paso completado manda un SNAPSHOT del estado entero, no un fragmento.
+   Dos razones, y las dos importan:
+
+   · Si alguien abandona a mitad de camino, la respuesta parcial ya está guardada
+     y se sabe en qué paso se fue. El abandono en encuestas largas no es aleatorio
+     (deserta más el menos interesado), así que medirlo es parte del dato.
+   · Como cada envío es autosuficiente, un envío que falla no pierde nada: el
+     siguiente lleva todo de nuevo. No hace falta reintentar lo viejo.
+
+   La tabla es append-only con un índice único por (respuesta, paso): reenviar el
+   mismo paso no duplica, devuelve conflicto y se ignora. Nunca bloquea a la persona:
+   si no hay red, la encuesta sigue y al final queda la vía de copiar y pegar.
+*/
+let ultimoPasoEnviado = -1;
+
+async function sincronizar(completo){
+  if (!CONFIG.endpoint) return false;
+  if (!completo && S.paso <= ultimoPasoEnviado) return true;   // ya lo mandé
+  const fila = {
+    respuesta_id: S.id,
+    paso: S.paso,
+    completo: !!completo,
+    bloque: S.bloque,
+    version: CONFIG.version,
+    payload: S
+  };
+  try {
+    const res = await fetch(CONFIG.endpoint, {
+      method: "POST",
+      headers: {
+        "apikey": CONFIG.apikey,
+        "Content-Type": "application/json",
+        /* Solo return=minimal. NO usar resolution=ignore-duplicates: PostgREST lo
+           implementa como upsert y eso necesita permiso de UPDATE, que esta clave no
+           tiene a propósito. El reenvío del mismo paso devuelve 409 por el índice
+           único y acá abajo se trata como éxito, que es lo que es. */
+        "Prefer": "return=minimal"
+      },
+      body: JSON.stringify(fila),
+      keepalive: true        // que el envío sobreviva si la pestaña se cierra
+    });
+    if (res.ok || res.status === 409) { ultimoPasoEnviado = S.paso; return true; }
+    return false;
+  } catch(e) { return false; }
+}
+
+/* Si la persona cierra la pestaña a mitad de camino, intentar un último guardado.
+   `keepalive` permite que el pedido salga aunque la página se esté yendo. */
+window.addEventListener("pagehide", () => {
+  if (S.r.consentimiento && !S.terminado) sincronizar(false);
+});
+
+/* el orden de las tareas se fija una vez por persona */
+function ordenTareas(){
+  if (S.orden) return S.orden;
+  const n = DISENO.bloques[S.bloque].length;
+  const idx = [...Array(n).keys()];
+  for (let i=n-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [idx[i],idx[j]]=[idx[j],idx[i]]; }
+  // las fijas van intercaladas: una al principio del tramo, una al final, y la repetida al cierre
+  S.orden = {estimacion: idx, fijas:[0,1,0]};
+  guardar();
+  return S.orden;
+}
+
+/* ---------------------------------------------------------------- pasos */
+const app = document.getElementById("app");
+const PASOS = [];
+
+function P(render, valida){ PASOS.push({render, valida}); }
+
+/* ---- 0. portada y consentimiento */
+P(() => `
+  <h1>Cómo la gente organiza sus salidas de montaña</h1>
+  <p class="chico">Tesis de la Maestría en Management + Analytics, Universidad Torcuato Di Tella.
+  Responder lleva entre 9 y 10 minutos.</p>
+
+  <div class="tarjeta">
+    <h2 style="margin-top:0">Antes de empezar</h2>
+    <p><b>Para qué es.</b> Estoy estudiando cómo se decide y se organiza una salida de montaña
+    guiada en la Argentina, y qué valora la gente cuando la contrata. Es un trabajo académico y
+    no se usa para venderte nada.</p>
+    <p><b>Algo que corresponde que sepas.</b> Además de estudiar, soy socio de una empresa que
+    organiza salidas de montaña. Esta encuesta es parte de mi tesis, las respuestas no se usan
+    con fines comerciales y no te voy a contactar para ofrecerte nada.</p>
+    <p><b>Qué se guarda.</b> Tus respuestas y nada más. <b>No se pide tu nombre, tu teléfono ni
+    tu correo</b>, y no guardo tu dirección de IP junto con las respuestas. Se analizan todas
+    juntas, nunca de a una, y los resultados se publican solo de forma agregada. Se guardan en el
+    servidor de un proveedor externo, que puede estar fuera de la Argentina, y se borran cuando
+    la tesis se apruebe.</p>
+    <p><b>Qué pasa si abandonás.</b> Lo que vayas contestando <b>se guarda a medida que
+    avanzás</b>, también si cerrás la pestaña antes del final. Esas respuestas a medio terminar se
+    usan nada más que para saber en qué momento la gente deja la encuesta. Si te arrepentís,
+    avisame antes de llegar al final y la descarto.</p>
+    <p><b>Qué es obligatorio.</b> Es voluntario participar y podés cerrar la pestaña cuando
+    quieras. Si seguís, casi todas las preguntas hay que contestarlas, porque si falta una la
+    respuesta no entra en el análisis. Las de estudios e ingreso las podés saltear y la respuesta
+    sigue sirviendo.</p>
+    <p><b>Tus datos.</b> La respuesta no lleva nada que te identifique, así que una vez enviada no
+    puedo encontrarla para mostrártela, corregirla ni borrarla. Por eso, si querés retirarla,
+    tiene que ser antes de enviar.</p>
+    <p><b>Quién es responsable.</b> Martín Laborda, alumno de la Maestría en Management +
+    Analytics de la Universidad Torcuato Di Tella, legajo 24T3180, domicilio en [COMPLETAR].
+    Escribime a [COMPLETAR CORREO] por cualquier consulta o para pedirme los resultados cuando el
+    trabajo esté terminado. Mi director de tesis es [COMPLETAR NOMBRE], [COMPLETAR CORREO].</p>
+  </div>
+
+  <label class="opcion" id="op-cons">
+    <input type="checkbox" id="cons">
+    <span>Leí lo de arriba, tengo 18 años o más y acepto participar.</span>
+  </label>
+  <div class="err" id="e-cons" hidden>Hace falta aceptar para seguir.</div>
+  <div class="botones">
+    <button onclick="siguiente()">Empezar</button>
+    ${S.paso > 0 || Object.keys(S.r).length > 1
+      ? '<button class="sec" onclick="empezarDeNuevo()">Empezar de nuevo</button>' : ''}
+  </div>
+  ${S.paso > 0 || Object.keys(S.r).length > 1
+    ? '<p class="chico">Hay una encuesta a medio responder en este dispositivo. Si la empezó otra persona, usá «empezar de nuevo».</p>' : ''}
+`, () => {
+  const ok = document.getElementById("cons").checked;
+  document.getElementById("e-cons").hidden = ok;
+  if (ok && !S.r.consentimiento) {
+    S.r.consentimiento = new Date().toISOString();
+    guardar();
+  }
+  return ok;
+});
+
+/* ---- 1. filtro */
+P(() => `
+  <h2>Para empezar</h2>
+  ${radio("hizo", "En los últimos dos años, ¿hiciste alguna salida de montaña, trekking o travesía de al menos un día completo?",
+     ["Sí","No"])}
+  <div class="err" id="e-hizo" hidden>Elegí una opción.</div>
+  <div class="botones"><button onclick="siguiente()">Seguir</button></div>
+`, () => req("hizo","e-hizo"));
+
+/* ---- 2a. rama de quien NO hizo */
+P(() => S.r.hizo === "No" ? `
+  <h2>Un par de preguntas y pasamos a lo principal</h2>
+  ${radio("quiso","¿Alguna vez quisiste hacer una y no la hiciste?",
+     ["Sí, varias veces","Sí, alguna vez","No, nunca me lo planteé"])}
+  ${check("impidio","¿Qué te lo impidió? (podés marcar varias)",
+     ["El precio","No sabía con quién ir","No encontré una fecha que me sirviera",
+      "No me sentía en estado físico","No sabía si era para mí",
+      "No conocía operadores confiables","Falta de tiempo","Otra cosa"])}
+  ${num("prob_12m","¿Qué tan probable es que hagas una salida guiada en los próximos doce meses? (1 = imposible, 10 = segurísimo)",1,10)}
+  <div class="err" id="e-rama" hidden>Falta la primera pregunta.</div>
+  <div class="botones">
+    <button class="sec" onclick="anterior()">Volver</button>
+    <button onclick="siguiente()">Seguir</button>
+  </div>` : null,
+  () => req("quiso","e-rama"));
+
+/* ---- 2b. comportamiento pasado (solo practicantes) */
+P(() => S.r.hizo !== "Sí" ? null : `
+  <h2>Los últimos doce meses</h2>
+  <p class="chico">Si no te acordás exacto, poné tu mejor estimación. Es más útil un número
+  aproximado que un casillero vacío.</p>
+  ${num("k_cortas","¿Cuántas salidas <b>con guía o empresa</b> hiciste <b>de uno o dos días</b>?",0,40)}
+  ${num("k_largas","¿Y cuántas <b>con guía</b> de <b>tres días o más</b>?",0,40)}
+  ${num("k_propias","¿Cuántas hiciste <b>por tu cuenta</b>, sin guía ni empresa?",0,60)}
+  ${num("empresas","¿Con cuántas empresas distintas contrataste?",0,20)}
+  ${num("gasto_ultima","¿Cuánto pagaste por la <b>última</b> salida con guía? (en pesos)",0,99999999)}
+  ${num("gasto_llegar_ultima","¿Y cuánto gastaste <b>además</b> en llegar a esa salida: pasajes, nafta, peajes, hotel previo?",0,99999999)}
+  <div class="err" id="e-comp" hidden>Faltan las dos primeras.</div>
+  <div class="botones">
+    <button class="sec" onclick="anterior()">Volver</button>
+    <button onclick="siguiente()">Seguir</button>
+  </div>
+`, () => {
+  const ok = S.r.k_cortas !== undefined && S.r.k_largas !== undefined;
+  document.getElementById("e-comp").hidden = ok;
+  /* k es la suma, y se guarda derivado para no pedirlo dos veces. El modelo de planes
+     necesita las dos monedas por separado: un plan que cubre una travesía y una salida
+     de fin de semana al mismo precio se usa para la travesía, y eso es selección adversa
+     de catálogo. Con un k agregado no se puede asignar a nadie a un plan. */
+  if (ok) { S.r.k_guiadas = (S.r.k_cortas || 0) + (S.r.k_largas || 0); guardar(); }
+  return ok;
+});
+
+/* ---- 2c. cancelaciones (solo practicantes) */
+P(() => S.r.hizo !== "Sí" ? null : `
+  <h2>Cuando algo se cae</h2>
+  ${num("contrato_2a","En los <b>últimos dos años</b>, ¿cuántas salidas guiadas contrataste en total?",0,60)}
+  ${num("cancelo_2a","De esas, ¿a cuántas <b>te las canceló o reprogramó la empresa</b>?",0,
+        S.r.contrato_2a !== undefined ? S.r.contrato_2a : 60)}
+  ${S.r.contrato_2a !== undefined && S.r.cancelo_2a > S.r.contrato_2a
+      ? '<div class="err">No pueden ser más que las que contrataste.</div>' : ''}
+  ${num("sin_fecha","¿Cuántas veces quisiste hacer una salida y <b>no había ninguna fecha que te sirviera</b>?",0,40)}
+  ${S.r.cancelo_2a > 0 ? check("perdio","Además del dinero, ¿qué perdiste con esa cancelación?",
+     ["Nada, se resolvió bien","Los días que había pedido en el trabajo",
+      "Pasajes o reservas ya pagados","El entrenamiento que venía haciendo",
+      "Las ganas de volver a contratar ahí","Otra cosa"]) : ''}
+  <div class="err" id="e-can" hidden>Falta cuántas contrataste.</div>
+  <div class="botones">
+    <button class="sec" onclick="anterior()">Volver</button>
+    <button onclick="siguiente()">Seguir</button>
+  </div>
+`, () => {
+  const ok = S.r.contrato_2a !== undefined &&
+             !(S.r.cancelo_2a > S.r.contrato_2a);   // la inconsistencia pierde la fila entera
+  document.getElementById("e-can").hidden = ok;
+  return ok;
+});
+
+/* ---- 2d. intención futura: va en LAS DOS RAMAS.
+   Sin esto la brecha entre lo que la persona dice que haría y lo que hizo solo se puede
+   calcular entre fuentes distintas, no dentro de la misma persona, y esa brecha es el dato
+   del bloque del concepto. */
+P(() => `
+  <h2>Y el año que viene</h2>
+  ${num("k_intencion","Pensando en los <b>próximos doce meses</b>, ¿cuántas salidas <b>con guía o empresa</b> pensás hacer?",0,40)}
+  ${S.r.hizo === "No" ? radio("alguna_vez_guiada",
+      "¿Alguna vez hiciste una salida <b>con guía o empresa</b>, aunque haya sido hace más de dos años?",
+      ["Sí","No"]) : ''}
+  <div class="err" id="e-int" hidden>Falta el número. Si no pensás hacer ninguna, poné 0.</div>
+  <div class="botones">
+    <button class="sec" onclick="anterior()">Volver</button>
+    <button onclick="siguiente()">Seguir</button>
+  </div>
+`, () => req("k_intencion","e-int"));
+
+/* ---- 3. introducción al experimento + cheap talk */
+P(() => `
+  <h2>Ahora la parte principal</h2>
+  <p><b>Planes de suscripción para hacer montaña.</b> Funciona parecido a un gimnasio: pagás una
+  cuota todos los meses y vas juntando un crédito que después gastás en las salidas que elijas.</p>
+  <p>Vas a ver <b>tres planes por pantalla</b>, ${nTareas()} pantallas en total, y en cada una te
+  preguntamos dos cosas. <b>Van a aparecer combinaciones que hoy no existen en el mercado:
+  respondé como si existieran.</b></p>
+  <p class="chico">Para que tengas una referencia de precios de hoy: una salida de fin de semana
+  cuesta entre $280.000 y $500.000, y una travesía de cinco a siete días entre $850.000 y
+  $1.290.000.</p>
+
+  <div class="aviso">
+    <b>Algo que pasa siempre en estas encuestas.</b> Cuando a la gente le preguntan qué pagaría
+    por algo que todavía no existe, suele decir que pagaría más de lo que después realmente paga.
+    No es mala intención: en una encuesta la plata no sale del bolsillo.
+    <b>Te pedimos que elijas como si tuvieras que pagarlo de verdad este mes</b>, con la plata que
+    tenés, y sabiendo que ese dinero no lo vas a poder usar en otra cosa.
+  </div>
+  <div class="botones">
+    <button class="sec" onclick="anterior()">Volver</button>
+    <button onclick="siguiente()">Entendido, empecemos</button>
+  </div>
+`, () => true);
+
+/* ---- 4..N. las tareas del experimento */
+function nTareas(){ return DISENO.bloques[S.bloque].length + 3; }
+
+for (let t = 0; t < 13; t++) {
+  P(() => pintarTarea(t), () => validarTarea(t));
+}
+
+function tareaDe(i){
+  /* devuelve {perfiles, tipo, ref} — tipo: 'est' | 'fija'
+     Las fijas van en las posiciones 0, 6 y 12 (la última repite la primera fija). */
+  const o = ordenTareas();
+  if (i === 0)  return {perfiles: DISENO.fijas[0], tipo:"fija", ref:"fija-1"};
+  if (i === 6)  return {perfiles: DISENO.fijas[1], tipo:"fija", ref:"fija-2"};
+  if (i === 12) return {perfiles: DISENO.fijas[0], tipo:"fija", ref:"fija-1-repetida"};
+  const mapa = [null,0,1,2,3,4,null,5,6,7,8,9,null];
+  const k = mapa[i];
+  return {perfiles: DISENO.bloques[S.bloque][o.estimacion[k]], tipo:"est",
+          ref:"est-" + o.estimacion[k]};
+}
+
+function textoNivel(j, nivel){ return ATR[j].niveles[nivel]; }
+
+function pintarTarea(i){
+  const T = tareaDe(i);
+  const pos = posiciones(i, T.perfiles.length);
+  const yaEl = S.elecciones[i] || {};
+  let html = `<h2>Pantalla ${i+1} de 13</h2>
+    <p class="chico">¿Cuál de estos tres planes preferirías? Elegí uno aunque ninguno te
+    entusiasme: después te preguntamos si lo contratarías.</p>
+    <div class="planes">`;
+  pos.forEach((pIdx, vis) => {
+    const p = T.perfiles[pIdx];
+    const sel = yaEl.elegido === pIdx ? " sel" : "";
+    html += `<div class="plan-box${sel}" onclick="elegirPlan(${i},${pIdx})">
+      <div class="plan-cab">Plan ${"ABC"[vis]}</div>
+      <div class="plan-cuota">${textoNivel(0,p[0])}<small>por mes</small></div>`;
+    ordenAtributos().forEach(nom => {
+      const j = ATR.findIndex(a => a.nombre === nom);
+      html += `<div class="plan-fila"><b>${ETIQ[nom].titulo}</b>${textoNivel(j,p[j])}</div>`;
+    });
+    html += `</div>`;
+  });
+  /* 🔴 El texto cambia según la rama. Decirle "como hacés hoy" a alguien que no hizo
+     ninguna salida en dos años es falso, y la proporción de no compra es justamente el
+     estadístico con el que se prueba la tercera hipótesis: si la frase no aplica, el dato
+     no mide lo que se cree que mide. */
+  const practica = S.r.hizo === "Sí";
+  const alterna = practica ? "seguir comprando salida por salida, como hacés hoy"
+                           : "seguir como estás hoy, pagando cada salida cuando la hagas";
+  html += `</div>
+    <div class="recordatorio">Recordá que podés <b>no elegir ninguno</b> y ${alterna}. Si los
+    planes te parecen caros, esa es una respuesta perfectamente válida: te la preguntamos
+    abajo.</div>`;
+
+  if (yaEl.elegido !== undefined) {
+    html += `<div class="tarjeta">
+      <p style="margin-top:0"><b>${practica
+        ? "¿Contratarías ese plan, o seguirías comprando cada salida por separado?"
+        : "¿Contratarías ese plan, o seguirías como estás hoy?"}</b></p>
+      <p class="chico">${practica ? "Comprando por separado" : "Pagando cada salida suelta"}:
+      una salida de fin de semana con un operador del mercado cuesta <b>$280.000 al
+      contado</b>, o <b>3 cuotas fijas de $103.000</b> sobre un precio de lista de $309.000,
+      sin garantía de que se realice y en grupo de hasta 15 personas.</p>
+      ${radioEl(i,"compraria","",["Contrataría el plan que elegí",
+        practica ? "Seguiría comprando salida por salida"
+                 : "Seguiría como estoy, pagando cada salida cuando la haga"])}
+    </div>`;
+  }
+  html += `<div class="err" id="e-t${i}" hidden>Elegí un plan y después contestá la segunda pregunta.</div>
+    <div class="botones">
+      <button class="sec" onclick="anterior()">Volver</button>
+      <button onclick="siguiente()">Siguiente</button>
+    </div>`;
+  return html;
+}
+
+function semillaDeId(){
+  /* Hash del id del respondente, para que la permutación de pantalla varíe ENTRE personas
+     y no solo entre pantallas. 🔴 Antes la semilla era (i+1)*constante, o sea que todos
+     veían la misma permutación en la pantalla 3. En las diez tareas de estimación se
+     salvaba de rebote porque el orden de tareas cambia, pero las TRES FIJAS están clavadas
+     en las pantallas 0, 6 y 12: la posición quedaba confundida con el perfil para los 150
+     respondentes, y justamente esas tres son las que miden el acierto del modelo. */
+  let h = 2166136261;
+  for (const ch of String(S.id)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); }
+  return Math.abs(h) || 1;
+}
+
+/* Generador pseudoaleatorio decente, con semilla reproducible.
+   🔴 Antes acá había un congruencial lineal casero con `x % (k+1)`, y sobre tres elementos
+   producía SOLO 3 de las 6 permutaciones posibles: el primer perfil no caía nunca en la
+   posición A. Verificado sobre 3.000 identificadores. Eso reintroducía justo el sesgo de
+   posición que la función existe para evitar. Mulberry32 pasa las pruebas de uniformidad
+   y no cuesta nada. */
+function mulberry32(a){
+  return function(){
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function mezclar(arr, semilla){
+  const a = arr.slice();
+  const rnd = mulberry32(semilla);
+  rnd(); rnd();                        // descartar los dos primeros, que correlacionan con la semilla
+  for (let k = a.length - 1; k > 0; k--) {
+    const j = Math.floor(rnd() * (k + 1));
+    [a[k], a[j]] = [a[j], a[k]];
+  }
+  return a;
+}
+
+function posiciones(i, n){
+  return mezclar([...Array(n).keys()], (semillaDeId() ^ Math.imul(i + 1, 2654435761)) | 0);
+}
+
+/* El orden de los atributos dentro de la tarjeta se mezcla UNA VEZ por respondente y se
+   guarda: el primer atributo de una tarjeta pesa más que el último, así que dejarlo fijo
+   para todos le regala importancia al mismo atributo en los 150 casos. La cuota va siempre
+   primera y aparte, porque es el ancla de precio. */
+function ordenAtributos(){
+  if (S.ordenAtr) return S.ordenAtr;
+  S.ordenAtr = mezclar(ORDEN_MOSTRAR, semillaDeId());
+  guardar();
+  return S.ordenAtr;
+}
+
+window.elegirPlan = (i, pIdx) => {
+  S.elecciones[i] = Object.assign({}, S.elecciones[i], {elegido: pIdx, ts: Date.now()});
+  guardar(); pintar();
+};
+window.setEl = (i, campo, val) => {
+  S.elecciones[i] = Object.assign({}, S.elecciones[i], {[campo]: val});
+  guardar(); pintar();
+};
+
+function validarTarea(i){
+  const e = S.elecciones[i] || {};
+  const ok = e.elegido !== undefined && e.compraria !== undefined;
+  document.getElementById("e-t" + i).hidden = ok;
+  if (ok) {
+    const T = tareaDe(i);
+    S.elecciones[i].ref = T.ref;
+    S.elecciones[i].tipo = T.tipo;
+    S.elecciones[i].perfiles = T.perfiles;
+    guardar();
+  }
+  return ok;
+}
+
+/* ---- certeza */
+P(() => `
+  <h2>Una última cosa sobre lo que elegiste</h2>
+  ${escala("certeza","¿Qué tan seguro estás de las elecciones que hiciste?",
+     "1 = nada seguro", "10 = completamente seguro")}
+  <div class="err" id="e-cert" hidden>Elegí un número.</div>
+  <div class="botones">
+    <button class="sec" onclick="anterior()">Volver</button>
+    <button onclick="siguiente()">Seguir</button>
+  </div>
+`, () => req("certeza","e-cert"));
+
+/* ---- compromiso anual */
+P(() => `
+  <h2>Dos formas de pagar lo mismo</h2>
+  <p class="chico">Los dos planes son iguales en todo: mismas salidas, mismos destinos, mismas
+  condiciones. Lo único que cambia es el compromiso.</p>
+  ${radio("compromiso","¿Cuál elegirías?",
+    ["$70.000 por mes, me puedo dar de baja cuando quiera",
+     "$59.000 por mes, pero me comprometo por doce meses",
+     "Ninguno de los dos"])}
+  <div class="err" id="e-comp2" hidden>Falta elegir una.</div>
+  <div class="botones">
+    <button class="sec" onclick="anterior()">Volver</button>
+    <button onclick="siguiente()">Seguir</button>
+  </div>
+`, () => req("compromiso","e-comp2"));
+
+/* ---- mecanismo de acceso y meses sin viaje */
+P(() => `
+  <h2>Cómo debería funcionar</h2>
+  ${radio("mecanismo","Si te suscribís y querés viajar <b>antes</b> de haber juntado el crédito suficiente, ¿qué te parece más justo?",
+    ["Esperar hasta juntar el crédito",
+     "Viajar antes y pagar la diferencia de mi bolsillo",
+     "Que me adelanten el crédito a cambio de un compromiso de permanencia",
+     "Pagar un monto al inscribirme que me habilite desde el primer mes",
+     "Ninguna me convence"])}
+  ${num("meses_espera_n","Si el crédito se junta mes a mes, ¿cuántos meses estarías dispuesto a pagar antes de tu primera salida? (poné 0 si querrías usarlo desde el primer mes)",0,24)}
+  ${check("sin_viaje","En un mes en el que no viajás, ¿qué <b>dos cosas</b> te importarían más? (elegí hasta dos)",
+    ["Que el crédito se acumule y no se pierda nunca",
+     "Que se acumule, aunque tenga un vencimiento",
+     "Descuentos o beneficios en equipo y cursos",
+     "Poder pausar la cuota algunos meses al año",
+     "Nada en particular: entiendo que pago por tener el lugar asegurado"])}
+  ${radio("actualizacion","¿Cómo te parece que debería actualizarse la cuota con la inflación?",
+    ["Precio fijo en pesos por doce meses, aunque después suba de golpe",
+     "Ajuste automático cada tres meses por un índice público",
+     "Ajuste cuando el operador avise, con derecho a darme de baja",
+     "Cuota en dólares"])}
+  <div class="err" id="e-mec" hidden>Falta la primera.</div>
+  <div class="botones">
+    <button class="sec" onclick="anterior()">Volver</button>
+    <button onclick="siguiente()">Seguir</button>
+  </div>
+`, () => req("mecanismo","e-mec"));
+
+/* ---- perfil, al final a propósito */
+P(() => `
+  <h2>Para cerrar: sobre vos</h2>
+  <p class="chico">Estas preguntas sirven para comparar la muestra con las estadísticas oficiales
+  de turismo. Ninguna te identifica.</p>
+  ${radio("region","¿Dónde vivís?",
+    ["Ciudad de Buenos Aires","Provincia de Buenos Aires, Gran Buenos Aires",
+     "Provincia de Buenos Aires, resto","Córdoba","Santa Fe","Mendoza","Neuquén o Río Negro",
+     "Resto del país","Fuera de la Argentina"])}
+  ${radio("edad","¿Qué edad tenés?",
+    ["Menos de 25","25 a 34","35 a 44","45 a 54","55 a 64","65 o más"])}
+  ${radio("genero","¿Con qué género te identificás?",
+    ["Mujer","Varón","Otro","Prefiero no contestar"])}
+  ${radio("educacion","¿Cuál es el nivel de estudios más alto que completaste?",
+    ["Secundario o menos","Terciario o técnico","Universitario","Posgrado",
+     "Prefiero no contestar"])}
+  ${radio("ingreso_hogar","Sumando todo lo que entra por mes en tu casa, de todas las personas que aportan y después de descuentos, ¿en qué tramo cae?",
+    ["Hasta $800.000","Más de $800.000 y hasta $1.500.000",
+     "Más de $1.500.000 y hasta $2.500.000","Más de $2.500.000 y hasta $4.000.000",
+     "Más de $4.000.000 y hasta $6.000.000","Más de $6.000.000 y hasta $9.000.000",
+     "Más de $9.000.000","Prefiero no contestar"])}
+  ${num("personas_hogar","¿Cuántas personas viven en tu casa, contándote a vos y a los chicos?",1,15)}
+  ${radio("fin_de_mes","Pensando en todo lo que entra en tu casa, ¿cómo llegan a fin de mes?",
+    ["No alcanza y hay que pedir prestado","Justo, sin margen para ahorrar",
+     "Alcanza y queda algo","Alcanza bien y se puede ahorrar o invertir",
+     "Prefiero no contestar"])}
+  ${radio("cuota_otra","¿Pagás hoy alguna cuota mensual por deporte u ocio? (gimnasio, club, coach, alguna app)",
+    ["Sí, una","Sí, dos o más","No","No ahora, pero pagué antes"])}
+  ${S.canal === "sin_etiqueta" ? radio("como_llego","¿Por dónde llegaste a esta encuesta?",
+    ["Un aviso en Instagram o Facebook","Me la mandó alguien que conozco",
+     "Un grupo o comunidad de montaña","Otro lugar"]) : ''}
+  <div class="err" id="e-perf" hidden>Faltan región y edad.</div>
+  <div class="botones">
+    <button class="sec" onclick="anterior()">Volver</button>
+    <button onclick="enviar()">Enviar respuestas</button>
+  </div>
+`, () => {
+  const ok = S.r.region !== undefined && S.r.edad !== undefined;
+  document.getElementById("e-perf").hidden = ok;
+  return ok;
+});
+
+/* ---------------------------------------------------- helpers de widgets */
+function radio(campo, texto, ops){
+  let h = texto ? `<p><b>${texto}</b></p>` : "";
+  ops.forEach(o => {
+    const sel = S.r[campo] === o ? " sel" : "";
+    h += `<label class="opcion${sel}"><input type="radio" name="${campo}"
+      ${S.r[campo]===o?"checked":""} onchange="setR('${campo}', this.dataset.v)"
+      data-v="${esc(o)}"><span>${o}</span></label>`;
+  });
+  return h;
+}
+function radioEl(i, campo, texto, ops){
+  let h = texto ? `<p><b>${texto}</b></p>` : "";
+  const e = S.elecciones[i] || {};
+  ops.forEach(o => {
+    const sel = e[campo] === o ? " sel" : "";
+    h += `<label class="opcion${sel}"><input type="radio" name="${campo}-${i}"
+      ${e[campo]===o?"checked":""} onchange="setEl(${i},'${campo}', this.dataset.v)"
+      data-v="${esc(o)}"><span>${o}</span></label>`;
+  });
+  return h;
+}
+function check(campo, texto, ops){
+  let h = `<p><b>${texto}</b></p>`;
+  const act = S.r[campo] || [];
+  ops.forEach(o => {
+    const sel = act.includes(o) ? " sel" : "";
+    h += `<label class="opcion${sel}"><input type="checkbox"
+      ${act.includes(o)?"checked":""} onchange="togR('${campo}', this.dataset.v)"
+      data-v="${esc(o)}"><span>${o}</span></label>`;
+  });
+  return h;
+}
+/* Campo numérico que acepta cómo la gente escribe de verdad.
+   🔴 Antes era <input type="number">, y ahí "1.200.000" tecleado con puntos devuelve
+   value = "": la persona veía su número en la caja y el dato no se guardaba en ningún
+   lado. Pasa justo en las preguntas de plata, que son las más caras de volver a pedir.
+   Ahora es text, se limpian los separadores, y debajo se muestra lo que QUEDÓ guardado,
+   que es la única forma de que un recorte por tope no sea invisible. */
+function num(campo, texto, min, max){
+  const g = S.r[campo];
+  const v = g !== undefined ? g : "";
+  const plata = max > 10000;
+  const eco = g !== undefined
+    ? `<div class="chico" style="margin-top:3px">Guardado: <b>${plata ? "$" : ""}${g.toLocaleString("es-AR")}</b></div>`
+    : "";
+  return `<label><b>${texto}</b>
+    <input type="text" inputmode="numeric" autocomplete="off" value="${v}"
+      oninput="setNum('${campo}', this.value, ${min}, ${max})">${eco}</label>`;
+}
+function escala(campo, texto, izq, der){
+  let h = `<p><b>${texto}</b></p><div class="escala">`;
+  for (let i=1;i<=10;i++){
+    h += `<button class="${S.r[campo]===i?"sel":""}" onclick="setR('${campo}',${i})">${i}</button>`;
+  }
+  h += `</div><div class="chico" style="display:flex;justify-content:space-between">
+    <span>${izq}</span><span>${der}</span></div>`;
+  return h;
+}
+function esc(s){ return String(s).replace(/"/g,"&quot;"); }
+window.setR = (c,v) => { S.r[c] = v; guardar(); pintar(); };
+window.togR = (c,v) => {
+  const a = S.r[c] || [];
+  if (a.includes(v)) { S.r[c] = a.filter(x=>x!==v); }
+  else {
+    /* Tope de dos en la pregunta de los meses sin viaje: forzar la prioridad da más
+       información que dejar marcar todo, que es lo mismo que no preguntar. */
+    const tope = (c === "sin_viaje") ? 2 : 99;
+    S.r[c] = a.length >= tope ? a.slice(1).concat([v]) : a.concat([v]);
+  }
+  guardar(); pintar();
+};
+window.setNum = (c,v,min,max) => {
+  /* Se limpian puntos, comas, espacios y el signo de pesos: "$ 1.200.000" -> 1200000.
+     Sin esto, escribir un monto con separadores de miles no guardaba nada. */
+  const limpio = String(v).replace(/[^0-9]/g, "");
+  if (limpio === "") { delete S.r[c]; guardar(); pintar(); return; }
+  let n = Number(limpio);
+  if (!Number.isFinite(n)) return;
+  n = Math.max(min, Math.min(max, n));
+  const cambio = S.r[c] !== n;
+  S.r[c] = n;
+  /* Si bajan las contratadas por debajo de las canceladas, se recorta en el acto: dejarlo
+     inconsistente hasta apretar "Seguir" muestra un error que el usuario no entiende. */
+  if (c === "contrato_2a" && S.r.cancelo_2a > n) { S.r.cancelo_2a = n; guardar(); pintar(); return; }
+  guardar();
+  /* El tope del campo de canceladas depende de las contratadas, y está embebido en el HTML:
+     sin repintar, el input se queda con el tope viejo y acepta un valor que después rebota. */
+  if (c === "contrato_2a" && cambio) { pintar(); return; }
+  /* Repintar solo cuando el valor guardado difiere de lo tecleado (un recorte por tope),
+     para que el eco de abajo no mienta. Repintar siempre movería el cursor en cada letra. */
+  if (cambio && String(n) !== limpio) pintar();
+  else if (cambio) {
+    const lab = document.activeElement && document.activeElement.closest("label");
+    if (lab) {
+      const eco = lab.querySelector(".chico");
+      const plata = max > 10000;
+      if (eco) eco.innerHTML = 'Guardado: <b>' + (plata ? "$" : "") + n.toLocaleString("es-AR") + '</b>';
+      else lab.insertAdjacentHTML("beforeend",
+        '<div class="chico" style="margin-top:3px">Guardado: <b>' +
+        (plata ? "$" : "") + n.toLocaleString("es-AR") + '</b></div>');
+    }
+  }
+};
+function req(campo, errId){
+  const ok = S.r[campo] !== undefined;
+  const e = document.getElementById(errId);
+  if (e) e.hidden = ok;
+  return ok;
+}
+
+/* ---------------------------------------------------- navegación */
+function pasosVisibles(){
+  return PASOS.map((p,i) => ({p,i})).filter(x => x.p.render() !== null);
+}
+window.siguiente = () => {
+  const act = PASOS[S.paso];
+  if (act.valida && !act.valida()) return;
+  let n = S.paso + 1;
+  while (n < PASOS.length && PASOS[n].render() === null) n++;
+  if (n >= PASOS.length) return;
+  S.paso = n; guardar(); pintar(); window.scrollTo(0,0);
+  /* Se guarda en el servidor después de avanzar, sin await: la persona no espera
+     por la red. Solo a partir del consentimiento, nunca antes. */
+  if (S.r.consentimiento) sincronizar(false);
+};
+window.anterior = () => {
+  let n = S.paso - 1;
+  while (n > 0 && PASOS[n].render() === null) n--;
+  S.paso = Math.max(0, n); guardar(); pintar(); window.scrollTo(0,0);
+};
+
+function pintar(){
+  const html = PASOS[S.paso].render();
+  app.innerHTML = html === null ? "" : html;
+  const vis = pasosVisibles();
+  const pos = vis.findIndex(x => x.i === S.paso);
+  const prog = document.getElementById("progreso");
+  if (S.paso > 0 && pos >= 0) {
+    prog.hidden = false;
+    document.getElementById("barra").style.width = Math.round(100*(pos)/(vis.length-1)) + "%";
+    document.getElementById("paso-txt").textContent =
+      "Paso " + (pos+1) + " de " + vis.length;
+  } else { prog.hidden = true; }
+}
+
+/* ---------------------------------------------------- envío */
+window.enviar = async () => {
+  const act = PASOS[S.paso];
+  if (act.valida && !act.valida()) return;
+  S.terminado = new Date().toISOString();
+  S.bloque_id = S.bloque;
+  S.diseno_derror = DISENO.derror;
+  guardar();
+
+  const payload = JSON.stringify(S);
+  app.innerHTML = `<h2>Enviando…</h2><p class="chico">Un segundo.</p>`;
+
+  /* Dos intentos con una espera en el medio: la mayoría de los fallos de red son
+     momentáneos, y acá la respuesta ya está completa y sería una pena perderla. */
+  let ok = await sincronizar(true);
+  if (!ok) {
+    await new Promise(r => setTimeout(r, 1500));
+    ok = await sincronizar(true);
+  }
+
+  if (ok) {
+    try { localStorage.removeItem(LS); } catch(e){}
+    app.innerHTML = `<h1>Listo, gracias</h1>
+      <p>Tu respuesta quedó registrada. Gracias por tomarte el tiempo de responder y llegar
+      hasta el final.</p>`;
+  } else {
+    /* La via de respaldo existe porque una respuesta completa que se pierde por un error de
+       red es una respuesta que hay que volver a conseguir. */
+    app.innerHTML = `<h1>Casi listo</h1>
+      <div class="aviso"><b>Terminaste, pero no pude confirmar el último envío.</b> Lo más
+      probable es que haya quedado guardado igual, porque la encuesta va guardando a medida que
+      avanzás. Si querés asegurarte, probá el botón de reintentar.</div>
+      <div class="botones">
+        <button onclick="reintentar()">Reintentar el envío</button>
+        <button class="sec" onclick="verVolcado()">Copiar la respuesta a mano</button>
+      </div>
+      <div id="respaldo" hidden>
+        <p class="chico">Copiá este texto y mandámelo por donde me escribiste.</p>
+        <button onclick="copiar()">Copiar el texto</button>
+        <code class="codigo" id="volcado">${esc(payload)}</code>
+      </div>`;
+  }
+  document.getElementById("progreso").hidden = true;
+};
+/* Dos personas que responden en el mismo teléfono (una charla, una reunión) compartirían
+   el estado guardado: la segunda seguiría la encuesta de la primera. Esto le da salida. */
+/* Se pregunta antes de borrar: un toque accidental en «¿No sos vos?» a mitad del
+   experimento tiraría abajo doce minutos de respuestas. */
+window.confirmarReinicio = (ev) => {
+  if (ev) ev.preventDefault();
+  if (confirm("Esto borra lo que está respondido en este dispositivo y empieza una encuesta nueva. ¿Seguimos?")) {
+    empezarDeNuevo();
+  }
+};
+
+window.empezarDeNuevo = () => {
+  try { localStorage.removeItem(LS); } catch(e){}
+  S = { id: nuevoId(), bloque: Math.floor(Math.random()*DISENO.bloques.length),
+        iniciado: new Date().toISOString(), canal: canalDeUrl(),
+        pantalla: (typeof screen !== "undefined" ? screen.width + "x" + screen.height : "?"),
+        movil: /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent || ""),
+        paso: 0, r: {}, elecciones: [], orden: null, ordenAtr: null,
+        version: CONFIG.version };
+  ultimoPasoEnviado = -1;
+  guardar(); pintar(); window.scrollTo(0,0);
+};
+
+window.verVolcado = () => { document.getElementById("respaldo").hidden = false; };
+window.reintentar = async () => {
+  app.innerHTML = `<h2>Reintentando…</h2>`;
+  ultimoPasoEnviado = -1;
+  const ok = await sincronizar(true);
+  if (ok) {
+    try { localStorage.removeItem(LS); } catch(e){}
+    app.innerHTML = `<h1>Listo, gracias</h1><p>Ahora sí quedó registrada.</p>`;
+  } else {
+    app.innerHTML = `<h1>Sigue sin conectar</h1>
+      <div class="aviso">Copiá el texto de abajo y mandámelo, así no se pierde.</div>
+      <button onclick="copiar()">Copiar el texto</button>
+      <code class="codigo" id="volcado">${esc(JSON.stringify(S))}</code>`;
+  }
+};
+window.copiar = () => {
+  const t = document.getElementById("volcado").textContent;
+  navigator.clipboard?.writeText(t).then(
+    () => alert("Copiado. Mandámelo por WhatsApp o correo, gracias."),
+    () => alert("No pude copiar. Seleccioná el texto a mano, por favor.")
+  );
+};
+
+pintar();
+</script>
+</body>
+</html>
