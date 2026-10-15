@@ -1369,6 +1369,13 @@ function pintar(){
       Math.round(100*pos/(vis.length-1)) + "%";
     document.getElementById("seccion").textContent = paso.seccion || "";
     document.getElementById("paso-txt").textContent = (pos+1) + " de " + vis.length;
+    /* `S.paso` es el indice crudo dentro de PASOS y asi tiene que quedar, porque
+       es parte de la clave unica de la tabla. Pero no sirve para leer el abandono:
+       las dos ramas saltean pasos distintos, asi que el paso 10 de quien practica
+       y el de quien no son momentos distintos de la encuesta. Estos dos si se
+       pueden comparar entre ramas. */
+    S.paso_visible = pos + 1;
+    S.pasos_totales = vis.length;
   } else { top.hidden = true; }
 }
 
