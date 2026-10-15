@@ -182,6 +182,13 @@
   @media (pointer:coarse){ .ficha{min-height:44px} .op{padding:12px 13px} }
   .op:has(input:focus-visible),.ficha:has(input:focus-visible){
     outline:2px solid var(--acento);outline-offset:2px}
+  /* Respaldo para navegadores sin :has(). El input va en opacity:0, asi que sin
+     esto en un Chrome viejo el foco por teclado no se ve en ningun lado. Va por
+     hermano, que funciona desde siempre. */
+  .op input:focus-visible ~ .marca,
+  .ficha input:focus-visible + .txt,
+  .elegir input:focus-visible + .txt{
+    outline:2px solid var(--acento);outline-offset:3px;border-radius:5px}
 
   /* ---------------------------------------------------------- botones */
   button{font:inherit;cursor:pointer}
@@ -262,6 +269,7 @@
     border-radius:var(--r-chico);background:var(--papel);color:var(--acento);
     font-size:.79rem;font-weight:620;cursor:pointer;text-align:center;
     transition:background .15s,color .15s,border-color .15s}
+  .elegir .txt{display:inline-flex;align-items:center;gap:4px}
   .elegir.on{background:var(--acento);border-color:var(--acento);color:var(--papel)}
   .elegir input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
   .elegir:has(input:focus-visible){outline:2px solid var(--tinta);outline-offset:2px}
@@ -430,11 +438,11 @@ const ATR = DISENO.atributos;
    El icono aparece en la glosa y en pantalla grande. */
 const ETIQ = {
   cuota:    {t:"Cuota mensual",          b:"Cuota",           ic:"cuota",    q:"Lo que pagás todos los meses, viajes o no."},
-  cubre:    {t:"Alcanza para, por año",  b:"Findes al año",  ic:"cubre",    q:"Cuántos fines de semana cubre el crédito que juntás en un año. Una travesía de 5 a 7 días consume varios."},
+  cubre:    {t:"Fines de semana al año", b:"Findes al año",  ic:"cubre",    q:"Cuántos fines de semana cubre el crédito que juntás en un año. Una travesía de 5 a 7 días consume varios."},
   garantia: {t:"Si no junta gente",      b:"Si no junta",     ic:"garantia", q:"Qué pasa cuando una salida no llega al mínimo de personas. Hoy, se cancela."},
-  grupo:    {t:"Tamaño del grupo",       b:"Grupo, 2 guías",  ic:"grupo",    q:"Cuántas personas como máximo van en cada salida. Siempre con dos guías."},
+  grupo:    {t:"Grupo, siempre 2 guías", b:"Grupo, 2 guías",  ic:"grupo",    q:"Cuántas personas como máximo van en cada salida. Siempre con dos guías."},
   destinos: {t:"Destinos",               b:"Destinos",        ic:"destinos", q:"En qué zonas podés usar el crédito."},
-  reserva:  {t:"Para elegir fecha",      b:"Reservar",        ic:"reserva",  q:"Con cuánta libertad podés reservar el día que querés."}
+  reserva:  {t:"Para reservar fecha",    b:"Reservar",        ic:"reserva",  q:"Con cuánta libertad podés reservar el día que querés."}
 };
 const ORDEN_MOSTRAR = ["cubre","garantia","grupo","destinos","reserva"];
 
@@ -477,7 +485,7 @@ const CORTO = {
   /* Los tres se leen abajo del rótulo "Reservar", y por eso contrastan de a
      pares: libre contra con cupo contra recién a 30 días. */
   reserva: [
-    {v:"Libre",     s:"sin cupo"},
+    {v:"Cualquier", s:"fecha"}       ,
     {v:"Con cupo",  s:"findes largos"},
     {v:"A 30 días", s:"no antes"}
   ]
@@ -643,7 +651,9 @@ function ordenTareas(){
   const n = DISENO.bloques[S.bloque].length;
   const idx = [...Array(n).keys()];
   for (let i=n-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [idx[i],idx[j]]=[idx[j],idx[i]]; }
-  S.orden = {estimacion: idx, fijas:[0,1,0]};
+  /* Solo el orden de las diez tareas de estimacion: cuales son las fijas y en
+     que pantalla van es fijo para todos y lo resuelve tareaDe(). */
+  S.orden = {estimacion: idx};
   guardar();
   return S.orden;
 }
@@ -691,7 +701,7 @@ function radio(campo, texto, ops, modo){
     const on = S.r[campo] === o.v;
     h += fichas
       ? `<label class="ficha${on?" on":""}" title="${esc(o.v)}"><input type="radio" name="${campo}"
-           ${on?"checked":""} data-v="${esc(o.v)}" onchange="setR('${campo}',this.dataset.v)">${o.l}</label>`
+           ${on?"checked":""} data-v="${esc(o.v)}" onchange="setR('${campo}',this.dataset.v)"><span class="txt">${o.l}</span></label>`
       : `<label class="op${on?" on":""}"><input type="radio" name="${campo}"
            ${on?"checked":""} data-v="${esc(o.v)}" onchange="setR('${campo}',this.dataset.v)"
            ><span class="marca"><i></i></span><span>${o.l}${o.s?`<span class="sub">${o.s}</span>`:""}</span></label>`;
@@ -708,7 +718,7 @@ function check(campo, texto, ops, modo){
     const on = act.includes(o.v);
     h += fichas
       ? `<label class="ficha${on?" on":""}" title="${esc(o.v)}"><input type="checkbox"
-           ${on?"checked":""} data-v="${esc(o.v)}" onchange="togR('${campo}',this.dataset.v)">${o.l}</label>`
+           ${on?"checked":""} data-v="${esc(o.v)}" onchange="togR('${campo}',this.dataset.v)"><span class="txt">${o.l}</span></label>`
       : `<label class="op cuadro${on?" on":""}"><input type="checkbox"
            ${on?"checked":""} data-v="${esc(o.v)}" onchange="togR('${campo}',this.dataset.v)"
            ><span class="marca"><i></i></span><span>${o.l}</span></label>`;
@@ -1085,8 +1095,8 @@ function pintarTarea(i){
     pies += `<div class="pie-cmp" data-c="${vis}">
       <label class="elegir${on}">
         <input type="radio" name="plan-${i}" ${on?"checked":""}
-          onchange="elegirPlan(${i},${pIdx})">
-        ${on ? ico("tilde",15) + "Elegido" : "Elegir " + "ABC"[vis]}
+          onchange="elegirPlan(${i},${pIdx})"><span class="txt">${
+          on ? ico("tilde",15) + "Elegido" : "Elegir " + "ABC"[vis]}</span>
       </label></div>`;
   });
 
@@ -1132,12 +1142,12 @@ function pintarTarea(i){
     <div class="fichas">
       <label class="ficha${compra==="plan"?" on":""}${elegido===undefined?" off":""}">
         <input type="radio" name="compra-${i}" ${compra==="plan"?"checked":""}
-          ${elegido===undefined?"disabled":""} onchange="setEl(${i},'compraria','plan')">
-        Sí, lo contrato</label>
+          ${elegido===undefined?"disabled":""} onchange="setEl(${i},'compraria','plan')"
+          ><span class="txt">Sí, lo contrato</span></label>
       <label class="ficha${compra==="ninguno"?" on":""}${elegido===undefined?" off":""}">
         <input type="radio" name="compra-${i}" ${compra==="ninguno"?"checked":""}
-          ${elegido===undefined?"disabled":""} onchange="setEl(${i},'compraria','ninguno')">
-        No, sigo como hoy</label>
+          ${elegido===undefined?"disabled":""} onchange="setEl(${i},'compraria','ninguno')"
+          ><span class="txt">No, sigo como hoy</span></label>
     </div>
     <p class="micro">Si te parecen caros, no contratar ninguno es una respuesta
     válida: ${alterna}.</p>
@@ -1274,9 +1284,13 @@ P(() => `
     ["Secundario o menos","Terciario o técnico","Universitario","Posgrado",
      {v:"Prefiero no contestar", l:"Prefiero no decir"}], "fichas")}
   ${num("personas_hogar","¿Cuántas personas viven en tu casa, contándote a vos y a los chicos?",1,15)}
-`, () => S.r.personas_hogar !== undefined ? bien()
-      : fallo("Falta cuántas personas viven en tu casa."),
-  {seccion:"Sobre vos"});
+`, () => {
+  /* El consentimiento promete que las unicas salteables son estudios e ingreso,
+     asi que genero se exige. Tiene "prefiero no decir", que es una respuesta. */
+  if (S.r.genero === undefined) return fallo("Falta el género. Podés elegir «prefiero no decir».");
+  if (S.r.personas_hogar === undefined) return fallo("Falta cuántas personas viven en tu casa.");
+  return bien();
+}, {seccion:"Sobre vos"});
 
 /* ---- 29. perfil: el ingreso del hogar ------------------------------ */
 /* Sola en su pantalla: son ocho tramos y es la pregunta que más se saltea, así
