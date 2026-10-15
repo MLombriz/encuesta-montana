@@ -4,86 +4,389 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<title>Encuesta sobre salidas de montaña — Tesis UTDT</title>
+<title>Encuesta sobre salidas de montaña (Tesis UTDT)</title>
 <style>
+  /* =======================================================================
+     Encuesta del CP3 — tesis MiM + AI (UTDT), Martín Laborda.
+
+     Regla de diseño que manda sobre todo lo demás: la mayoría va a responder
+     desde el teléfono, y CADA PANTALLA TIENE QUE ENTRAR SIN SCROLL, con la
+     comparación de los tres planes completa a la vista. Si hay que elegir
+     entre que algo entre y que se vea todo, entra con scroll: nada se oculta.
+
+     Decisiones que vienen de eso:
+     · La página no scrollea por capricho: el encabezado de progreso queda
+       pegado arriba, la barra de acción queda pegada abajo, y el contenido
+       del medio está dimensionado para caber en 390x844 (iPhone chico).
+     · Los niveles de los atributos se muestran con una etiqueta corta fiel,
+       no con la frase larga del diseño. La frase completa queda en el atributo
+       `title` de cada celda y el significado de cada atributo se explica en
+       una pantalla previa. Sin esto la comparación no entra en un teléfono.
+     · Las preguntas largas se reparten en más pantallas con menos ítems. En
+       móvil eso baja el abandono: es peor una pantalla que se scrollea tres
+       veces que dos pantallas cortas.
+     · Nada de hover como único indicador: en teléfono no existe.
+     ======================================================================= */
+  /* Paleta: papel cálido, tinta fría. Es una encuesta académica que llega por
+     un link de alguien: tiene que leerse como un cuestionario impreso y no como
+     un embudo de venta. Un solo acento, usado para la acción y la selección,
+     nunca para decorar.
+
+     🔴 Los valores van primero en hexadecimal y después en OKLCH dentro de un
+     @supports. Un teléfono Android con Chrome viejo (que en Argentina son
+     muchos) no entiende oklch(), y como estos valores viven en variables, la
+     variable queda inválida al usarse y el elemento se queda SIN color: la
+     encuesta se serviría ilegible y nadie me lo iba a avisar, simplemente
+     cerrarían la pestaña. */
   :root{
-    --tinta:#1a1a18; --suave:#5c5c56; --linea:#dcdcd4; --fondo:#faf9f6;
-    --papel:#ffffff; --acento:#2d5f4f; --acento-claro:#eaf2ee; --alerta:#8a4b2a;
+    --papel:        #fdfcfa;
+    --fondo:        #f7f5f1;
+    --fondo2:       #efece6;
+    --tinta:        #22242b;
+    --suave:        #6b6e78;
+    --tenue:        #90939c;
+    --linea:        #ddd9d1;
+    --linea2:       #eceae4;
+    --acento:       #2f4a72;
+    --acento-hover: #253a5a;
+    --acento-piso:  #eef1f8;
+    --acento-linea: #9eaec8;
+    --alerta:       #8a4a26;
+    --alerta-piso:  #fbf2e9;
+    --alerta-linea: #e4cbb2;
+    --r: 12px;
+    --r-chico: 9px;
     color-scheme: light;
   }
+  @supports (color: oklch(50% 0.1 250)){
+    :root{
+      --papel:        oklch(99%   0.004  85);
+      --fondo:        oklch(96.5% 0.007  85);
+      --fondo2:       oklch(94%   0.008  85);
+      --tinta:        oklch(24%   0.012 265);
+      --suave:        oklch(49%   0.011 265);
+      --tenue:        oklch(62%   0.010 265);
+      --linea:        oklch(87.5% 0.009  85);
+      --linea2:       oklch(93%   0.007  85);
+      --acento:       oklch(43%   0.085 258);
+      --acento-hover: oklch(37%   0.090 258);
+      --acento-piso:  oklch(95.5% 0.022 258);
+      --acento-linea: oklch(70%   0.060 258);
+      --alerta:       oklch(45%   0.105  48);
+      --alerta-piso:  oklch(96%   0.025  70);
+      --alerta-linea: oklch(86%   0.040  70);
+    }
+  }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--fondo);color:var(--tinta);
-    font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
-  .marco{max-width:680px;margin:0 auto;padding:20px 18px 60px}
-  h1{font-size:1.45rem;line-height:1.25;margin:.2em 0 .4em;font-weight:650}
-  h2{font-size:1.1rem;margin:1.6em 0 .5em;font-weight:650}
-  p{margin:.6em 0}
-  .chico{font-size:.86rem;color:var(--suave)}
-  .tarjeta{background:var(--papel);border:1px solid var(--linea);border-radius:12px;
-    padding:18px;margin:14px 0}
-  .progreso{position:sticky;top:env(safe-area-inset-top,0);z-index:5;background:var(--fondo);
-    padding:10px 0 8px;border-bottom:1px solid var(--linea);margin-bottom:6px}
-  .barra{height:5px;background:var(--linea);border-radius:3px;overflow:hidden}
-  .barra > i{display:block;height:100%;background:var(--acento);width:0;transition:width .25s}
-  label{display:block;margin:.5em 0}
-  input[type=number],input[type=text],select{width:100%;padding:11px 12px;font-size:1rem;
-    border:1px solid var(--linea);border-radius:8px;background:var(--papel);color:var(--tinta)}
-  .opcion{display:flex;gap:10px;align-items:flex-start;padding:11px 13px;border:1px solid var(--linea);
-    border-radius:9px;margin:7px 0;cursor:pointer;background:var(--papel)}
-  .opcion:hover{border-color:var(--acento)}
-  .opcion input{margin-top:3px;flex:0 0 auto}
-  .opcion.sel{border-color:var(--acento);background:var(--acento-claro)}
-  button{font:inherit;font-weight:600;padding:13px 22px;border-radius:9px;border:1px solid var(--acento);
-    background:var(--acento);color:#fff;cursor:pointer}
-  button.sec{background:transparent;color:var(--acento)}
-  button:disabled{opacity:.4;cursor:not-allowed}
-  .botones{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
-  table.plan{width:100%;border-collapse:collapse;font-size:.92rem}
-  table.plan th{text-align:left;padding:7px 8px;background:#f2f1ec;font-weight:600;width:34%;
-    vertical-align:top;border-bottom:1px solid var(--linea)}
-  table.plan td{padding:7px 8px;border-bottom:1px solid var(--linea);vertical-align:top}
-  .planes{display:grid;gap:12px}
-  @media(min-width:620px){.planes{grid-template-columns:repeat(3,1fr)}}
-  .plan-box{border:1.5px solid var(--linea);border-radius:11px;overflow:hidden;background:var(--papel);
-    cursor:pointer;display:flex;flex-direction:column}
-  .plan-box:hover{border-color:var(--acento)}
-  .plan-box.sel{border-color:var(--acento);box-shadow:0 0 0 2px var(--acento-claro)}
-  .plan-cab{background:var(--acento);color:#fff;padding:9px 11px;font-weight:650;font-size:.95rem}
-  .plan-box.sel .plan-cab{background:#1f4538}
-  .plan-cuota{font-size:1.3rem;font-weight:700;padding:11px 11px 2px}
-  .plan-cuota small{font-size:.75rem;font-weight:400;color:var(--suave);display:block}
-  .plan-fila{padding:7px 11px;font-size:.87rem;border-top:1px solid #efeee9}
-  .plan-fila b{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.03em;
-    color:var(--suave);font-weight:600;margin-bottom:1px}
-  .aviso{background:#fdf6ee;border-left:3px solid var(--alerta);padding:11px 13px;
-    border-radius:0 7px 7px 0;font-size:.9rem;margin:14px 0}
-  .recordatorio{background:#f2f1ec;padding:11px 13px;border-radius:8px;font-size:.88rem;
-    color:var(--suave);margin:14px 0}
-  .escala{display:flex;gap:5px;flex-wrap:wrap;margin:10px 0}
-  .escala button{flex:1 1 auto;min-width:38px;padding:11px 0;background:var(--papel);
-    color:var(--tinta);border:1px solid var(--linea);font-weight:500}
-  .escala button.sel{background:var(--acento);color:#fff;border-color:var(--acento)}
-  .err{color:var(--alerta);font-size:.88rem;margin-top:8px;font-weight:600}
-  code.codigo{display:block;background:#f2f1ec;padding:14px;border-radius:8px;font-size:.8rem;
-    word-break:break-all;margin:12px 0;max-height:190px;overflow:auto}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--fondo);color:var(--tinta);
+    font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* El armazón: barra de progreso arriba, lienzo que crece, barra de acción
+     abajo. `min-height` y no `height` fija: con el teclado abierto o con el
+     tamaño de letra del sistema en grande, una altura fija recorta contenido. */
+  .app{min-height:100dvh;display:flex;flex-direction:column}
+  @supports not (height: 100dvh){ .app{min-height:100vh} }
+  .centro{width:100%;max-width:880px;margin:0 auto;padding:0 16px}
+
+  /* ---------------------------------------------------------- progreso */
+  /* Fondo opaco, no translúcido: pegado arriba tiene que tapar lo que pasa por
+     abajo en el teléfono más lento que exista. */
+  .top{position:sticky;top:0;z-index:20;background:var(--fondo);
+    border-bottom:1px solid var(--linea);padding-top:env(safe-area-inset-top,0)}
+  .top .centro{padding-top:6px;padding-bottom:5px}
+  .barra{height:4px;background:var(--fondo2);border-radius:2px;overflow:hidden}
+  .barra > i{display:block;height:100%;background:var(--acento);width:0;
+    transition:width .3s cubic-bezier(.22,1,.36,1)}
+  .top-txt{display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+    margin-top:5px;font-size:.73rem;color:var(--suave)}
+  .top-txt b{font-weight:600;color:var(--tinta)}
+  .salida{color:var(--tenue);text-decoration:underline;white-space:nowrap;font-size:.74rem}
+
+  /* ------------------------------------------------------------ lienzo */
+  .lienzo{flex:1 1 auto;padding:10px 0 12px}
+  .lienzo .centro{display:flex;flex-direction:column;gap:9px}
+
+  /* ------------------------------------------------- barra de acción */
+  /* Pegada abajo siempre: en teléfono el botón que sigue tiene que estar a la
+     vista sin buscarlo, y el aviso de error tiene que aparecer al lado del
+     botón que la persona acaba de apretar, no arriba fuera de pantalla. */
+  .pie{position:sticky;bottom:0;z-index:20;background:var(--papel);
+    border-top:1px solid var(--linea);box-shadow:0 -6px 20px -16px rgba(34,36,43,.5);
+    padding-bottom:env(safe-area-inset-bottom,0)}
+  .pie .centro{padding-top:8px;padding-bottom:8px;display:flex;flex-direction:column;gap:7px}
+  .acciones{display:flex;gap:10px;align-items:center}
+  .acciones .pri{flex:1 1 auto}
+  @media(min-width:560px){
+    .acciones{justify-content:space-between}
+    .acciones .pri{flex:0 0 auto;min-width:230px}
+  }
+  .acciones .sec{flex:0 0 auto}
+
+  /* ------------------------------------------------------- tipografía */
+  h1{font-size:1.34rem;line-height:1.22;margin:0;font-weight:680;letter-spacing:-.01em}
+  h2{font-size:1.2rem;line-height:1.25;margin:0;font-weight:660;letter-spacing:-.005em}
+  p{margin:0}
+  .intro{color:var(--suave);font-size:.95rem;max-width:62ch}
+  .micro{font-size:.79rem;line-height:1.45;color:var(--suave)}
+  .rotulo{font-size:.71rem;text-transform:uppercase;letter-spacing:.07em;font-weight:650;
+    color:var(--tenue)}
+  .preg{font-size:1rem;font-weight:590;line-height:1.35;display:block}
+  .bloque{display:flex;flex-direction:column;gap:8px}
+
+  /* --------------------------------------------------------- tarjetas */
+  .caja{background:var(--papel);border:1px solid var(--linea);border-radius:var(--r);padding:13px}
+  .caja.tenue{background:var(--fondo2);border-color:var(--linea2)}
+  /* Aviso sin franja lateral: borde completo, fondo teñido y un icono. */
+  .nota{background:var(--alerta-piso);border:1px solid var(--alerta-linea);
+    border-radius:var(--r);padding:13px 14px;font-size:.88rem;line-height:1.45;
+    display:flex;gap:11px;align-items:flex-start}
+  .nota svg{flex:0 0 auto;margin-top:1px;color:var(--alerta)}
+
+  /* --------------------------------------------------------- opciones */
+  .lista{display:flex;flex-direction:column;gap:6px}
+  /* `position:relative` en todo lo que esconde un input adentro: si el input
+     absoluto no tiene un ancestro posicionado, el navegador lo ubica contra el
+     documento y al enfocarlo con el teclado la página salta al principio. */
+  .op{position:relative;display:flex;gap:11px;align-items:flex-start;padding:11px 13px;
+    border:1px solid var(--linea);border-radius:var(--r-chico);background:var(--papel);
+    cursor:pointer;font-size:.95rem;line-height:1.35;
+    transition:border-color .15s,background .15s}
+  .op .marca{flex:0 0 auto;width:19px;height:19px;border-radius:50%;border:1.5px solid var(--linea);
+    margin-top:1px;display:grid;place-items:center;transition:border-color .15s}
+  .op.cuadro .marca{border-radius:5px}
+  .op .marca i{width:9px;height:9px;border-radius:50%;background:transparent;transition:background .15s}
+  .op.cuadro .marca i{border-radius:2px}
+  .op.on{border-color:var(--acento);background:var(--acento-piso)}
+  .op.on .marca{border-color:var(--acento)}
+  .op.on .marca i{background:var(--acento)}
+  .op .sub{display:block;font-size:.81rem;color:var(--suave);margin-top:1px}
+  .op input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+
+  /* Fichas: para preguntas de muchas opciones cortas. Mucho más compacto que
+     una lista apilada, y en teléfono se barren con el pulgar. */
+  .fichas{display:flex;flex-wrap:wrap;gap:7px}
+  .ficha{position:relative;display:inline-flex;align-items:center;min-height:42px;padding:8px 15px;
+    border:1px solid var(--linea);border-radius:999px;background:var(--papel);
+    font-size:.92rem;cursor:pointer;transition:border-color .15s,background .15s,color .15s}
+  .ficha.on{background:var(--acento);border-color:var(--acento);color:var(--papel);font-weight:560}
+  .ficha input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+  .ficha.off{opacity:.45;cursor:not-allowed}
+  @media (hover:hover){
+    .op:hover{border-color:var(--acento-linea)}
+    .ficha:hover{border-color:var(--acento-linea)}
+    .ficha.on:hover{border-color:var(--acento)}
+  }
+  @media (pointer:coarse){ .ficha{min-height:44px} .op{padding:12px 13px} }
+  .op:has(input:focus-visible),.ficha:has(input:focus-visible){
+    outline:2px solid var(--acento);outline-offset:2px}
+
+  /* ---------------------------------------------------------- botones */
+  button{font:inherit;cursor:pointer}
+  .pri,.sec{font-weight:600;border-radius:var(--r-chico);padding:11px 18px;min-height:44px;
+    border:1px solid var(--acento);transition:background .15s,border-color .15s}
+  .pri{background:var(--acento);color:var(--papel)}
+  .sec{background:transparent;color:var(--acento)}
+  @media (hover:hover){ .pri:hover{background:var(--acento-hover);border-color:var(--acento-hover)}
+    .sec:hover{background:var(--acento-piso)} }
+  .pri:disabled,.sec:disabled{opacity:.4;cursor:not-allowed}
+  .pri:focus-visible,.sec:focus-visible{outline:2px solid var(--tinta);outline-offset:2px}
+
+  /* -------------------------------------------------- campos numéricos */
+  .campo{display:flex;flex-direction:column;gap:6px}
+  .campo .cab{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .eco{font-size:.8rem;font-weight:620;color:var(--acento);white-space:nowrap}
+  .caja-num{display:flex;align-items:stretch;border:1px solid var(--linea);
+    border-radius:var(--r-chico);background:var(--papel);overflow:hidden;max-width:230px}
+  .caja-num:focus-within{border-color:var(--acento);box-shadow:0 0 0 3px var(--acento-piso)}
+  .caja-num .sig{display:grid;place-items:center;padding:0 12px;background:var(--fondo2);
+    border-right:1px solid var(--linea);color:var(--suave);font-weight:600;font-size:.95rem}
+  .caja-num input{flex:1 1 auto;border:0;outline:0;background:transparent;color:var(--tinta);
+    padding:12px 13px;font:inherit;font-weight:560;min-width:0;width:100%}
+
+  /* ------------------------------------------------------------ escala */
+  .escala{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  @media(min-width:480px){ .escala{grid-template-columns:repeat(10,1fr)} }
+  .escala button{min-height:46px;border:1px solid var(--linea);border-radius:var(--r-chico);
+    background:var(--papel);color:var(--tinta);font-weight:560;font-size:.98rem;
+    transition:background .15s,border-color .15s,color .15s}
+  .escala button.on{background:var(--acento);border-color:var(--acento);color:var(--papel)}
+  .extremos{display:flex;justify-content:space-between;gap:10px;font-size:.78rem;color:var(--suave)}
+
+  /* =================================================== la comparación */
+  /* Una matriz, no tres tarjetas apiladas.
+
+     🔴 La columna de rótulos a la izquierda está TAMBIÉN en teléfono, y eso se
+     midió, no se intuyó. La primera versión ponía el rótulo del atributo en una
+     franja de ancho completo arriba de cada fila de tres valores: cinco franjas
+     de 21 px que suman 105 px de alto puro. Con esa variante la pantalla del
+     experimento pedía 1.131 px, y un iPhone de 844 px deja unos 700 útiles una
+     vez que Safari pone sus barras. Con el rótulo al costado ese alto se va a
+     cero, porque la columna nunca es más alta que la fila que acompaña. El
+     precio de esa decisión es que las celdas quedan de 93 px de ancho, y de ahí
+     viene que las etiquetas de los niveles tengan que ser cortas. */
+  .cmp{display:grid;grid-template-columns:72px repeat(3,1fr);
+    border:1px solid var(--linea);border-radius:var(--r);background:var(--papel);
+    overflow:hidden}
+  .cmp .esquina{border-top:1px solid var(--linea2)}
+  .cmp .esquina.sin-linea{border-top:0}
+  .cmp .banda{display:flex;align-items:center;gap:6px;
+    padding:6px 8px;background:var(--fondo2);border-top:1px solid var(--linea2);
+    font-size:.70rem;line-height:1.18;letter-spacing:.005em;overflow-wrap:break-word;
+    font-weight:620;color:var(--suave)}
+  /* El icono del atributo no entra en 78 px sin comerse el rótulo: aparece en
+     pantalla grande y en la glosa previa, que es donde se explica cada uno. */
+  .cmp .banda svg{display:none;color:var(--tenue);flex:0 0 auto}
+  .celda{padding:6px 7px;font-size:.8rem;line-height:1.2;border-top:1px solid var(--linea2);
+    border-left:1px solid var(--linea2);transition:background .15s}
+  .celda b{font-weight:620;display:block;font-size:.81rem;line-height:1.22}
+  .celda span{display:block;color:var(--suave);font-size:.70rem;line-height:1.2}
+  .celda.on{background:var(--acento-piso)}
+
+  .cab-plan{padding:6px 5px 7px;text-align:center;cursor:pointer;
+    border-top:0;border-left:1px solid var(--linea2);transition:background .15s}
+  .cab-plan .letra{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;
+    background:var(--fondo2);color:var(--suave);font-size:.62rem;font-weight:680;
+    margin-bottom:2px;transition:background .15s,color .15s}
+  .cab-plan .precio{font-size:.97rem;font-weight:700;letter-spacing:-.03em;white-space:nowrap;
+    line-height:1.15}
+  .cab-plan.on{background:var(--acento-piso)}
+  .cab-plan.on .letra{background:var(--acento);color:var(--papel)}
+
+  .pie-cmp{padding:6px 5px 7px;border-top:1px solid var(--linea2);
+    border-left:1px solid var(--linea2)}
+  .elegir{position:relative;display:flex;align-items:center;justify-content:center;gap:4px;width:100%;
+    min-height:42px;padding:6px 3px;border:1px solid var(--acento-linea);
+    border-radius:var(--r-chico);background:var(--papel);color:var(--acento);
+    font-size:.79rem;font-weight:620;cursor:pointer;text-align:center;
+    transition:background .15s,color .15s,border-color .15s}
+  .elegir.on{background:var(--acento);border-color:var(--acento);color:var(--papel)}
+  .elegir input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+  .elegir:has(input:focus-visible){outline:2px solid var(--tinta);outline-offset:2px}
+  @media (hover:hover){ .elegir:hover{background:var(--acento-piso)}
+    .elegir.on:hover{background:var(--acento-hover)} }
+
+  /* En pantalla angosta todo esta al minimo porque cada pixel se necesita
+     para que la comparacion entre. Desde 560 px sobra lugar: se devuelve. */
+  @media(max-width:379px){
+    .lienzo{padding:8px 0 10px}
+    .lienzo .centro{gap:8px}
+    .pie .centro{padding-top:7px;padding-bottom:7px}
+    .cmp{grid-template-columns:60px repeat(3,1fr)}
+    .celda b{font-size:.78rem}
+    .celda span{font-size:.675rem}
+    .cab-plan .precio{font-size:.92rem}
+    .cmp .banda{padding:6px 5px;font-size:.67rem}
+  }
+  @media(min-width:560px){
+    .lienzo{padding:18px 0 22px}
+    .lienzo .centro{gap:14px}
+    .cmp{grid-template-columns:150px repeat(3,1fr)}
+    .cmp .banda{padding:8px 11px;font-size:.75rem}
+    .cmp .banda svg{display:block}
+    .celda{font-size:.87rem;padding:9px 12px;line-height:1.3}
+    .celda b{font-size:.9rem}
+    .celda span{font-size:.78rem}
+    .cab-plan{padding:11px 10px 12px}
+    .cab-plan .letra{width:22px;height:22px;font-size:.74rem;margin-bottom:5px}
+    .cab-plan .precio{font-size:1.18rem}
+    .pie-cmp{padding:9px 9px 10px}
+    .elegir{font-size:.85rem;min-height:44px}
+  }
+
+  /* las dos respuestas de cada pantalla del experimento */
+  .dual{display:flex;flex-direction:column;gap:7px}
+  .dual .fichas .ficha{flex:1 1 0;justify-content:center;text-align:center;min-width:132px}
+  .cab-tarea{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+  .cab-tarea h2{font-size:1rem}
+
+  /* ----------------------------------------------------------- varios */
+  .pasos-expl{display:flex;flex-direction:column;gap:11px}
+  .paso-expl{display:flex;gap:12px;align-items:flex-start}
+  .paso-expl .n{flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:var(--acento);
+    color:var(--papel);display:grid;place-items:center;font-size:.8rem;font-weight:680}
+  .paso-expl div{font-size:.93rem;line-height:1.4}
+  .glosa{display:flex;flex-direction:column;gap:0;border:1px solid var(--linea);
+    border-radius:var(--r);background:var(--papel);overflow:hidden}
+  .glosa-fila{display:flex;gap:10px;padding:9px 12px;border-top:1px solid var(--linea2);
+    align-items:flex-start}
+  .glosa-fila:first-child{border-top:0}
+  .glosa-fila svg{flex:0 0 auto;color:var(--acento);margin-top:2px}
+  .glosa-fila b{font-size:.86rem;font-weight:630;display:block;line-height:1.25}
+  .glosa-fila span{font-size:.80rem;color:var(--suave);line-height:1.33}
+  .dos{display:grid;gap:10px}
+  @media(min-width:560px){ .dos{grid-template-columns:1fr 1fr} }
+  .grande{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:8px;
+    padding:17px 16px;border:1px solid var(--linea);border-radius:var(--r);
+    background:var(--papel);cursor:pointer;text-align:left;width:100%;
+    transition:border-color .15s,background .15s}
+  .grande.on{border-color:var(--acento);background:var(--acento-piso)}
+  .grande svg{color:var(--acento)}
+  .grande b{font-size:1.02rem;font-weight:640}
+  .grande em{font-style:normal;font-size:.84rem;color:var(--suave)}
+  .grande input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+  @media (hover:hover){ .grande:hover{border-color:var(--acento-linea)} }
+
+  details.mas{border:1px solid var(--linea);border-radius:var(--r-chico);background:var(--papel)}
+  details.mas + details.mas{margin-top:6px}
+  details.mas > summary{padding:10px 12px;cursor:pointer;font-size:.89rem;font-weight:570;
+    list-style:none;display:flex;justify-content:space-between;gap:10px;align-items:center}
+  details.mas > summary::-webkit-details-marker{display:none}
+  details.mas > summary::after{content:"+";color:var(--acento);font-weight:700;font-size:1.1rem;
+    line-height:1}
+  details.mas[open] > summary::after{content:"\2013"}
+  details.mas > div{padding:0 13px 12px;font-size:.87rem;line-height:1.5;color:var(--suave)}
+  details.mas > div p + p{margin-top:.6em}
+
+  .aviso-err{background:var(--alerta-piso);border:1px solid var(--alerta-linea);
+    color:var(--alerta);border-radius:var(--r-chico);padding:9px 12px;font-size:.86rem;
+    font-weight:570;line-height:1.35}
+  code.volcado{display:block;background:var(--fondo2);border:1px solid var(--linea);
+    padding:13px;border-radius:var(--r-chico);font-size:.76rem;word-break:break-all;
+    max-height:180px;overflow:auto}
+  .cierre{display:flex;flex-direction:column;gap:12px;align-items:flex-start;padding:22px 0}
+  .cierre .tilde{width:46px;height:46px;border-radius:50%;background:var(--acento-piso);
+    display:grid;place-items:center;color:var(--acento)}
   [hidden]{display:none!important}
+  @media (prefers-reduced-motion:reduce){ *{transition:none!important} }
 </style>
 </head>
 <body>
-<div class="marco">
-  <div class="progreso" id="progreso" hidden>
-    <div class="barra"><i id="barra"></i></div>
-    <div class="chico" style="margin-top:5px;display:flex;justify-content:space-between;gap:10px">
-      <span id="paso-txt"></span>
-      <!-- Tiene que estar en TODOS los pasos y no solo en la portada: al recargar, la
-           página retoma donde quedó y la portada no se vuelve a ver nunca. Si el teléfono
-           se presta a otra persona, esta es su única salida. -->
-      <a href="#" id="reinicio" onclick="confirmarReinicio(event)"
-         style="color:var(--suave);text-decoration:underline;white-space:nowrap">¿No sos vos?</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <g id="g-cuota"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 10v4M18 10v4"/></g>
+  <g id="g-cubre"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M8.4 15.4l2.2 2.2 4.4-4.4"/></g>
+  <g id="g-garantia"><path d="M12 3l7 2.6v5.6c0 4.3-2.9 7.6-7 9.2-4.1-1.6-7-4.9-7-9.2V5.6L12 3z"/></g>
+  <g id="g-grupo"><circle cx="9" cy="8.5" r="3.1"/><path d="M3.3 20c0-3.2 2.5-5.1 5.7-5.1s5.7 1.9 5.7 5.1"/><path d="M16.3 7.5a3 3 0 0 1 0 5.8M17.5 15c2 .5 3.2 2 3.2 4.3"/></g>
+  <g id="g-destinos"><path d="M12 21s7-6.4 7-11.4A7 7 0 0 0 5 9.6C5 14.6 12 21 12 21z"/><circle cx="12" cy="9.6" r="2.5"/></g>
+  <g id="g-reserva"><circle cx="12" cy="12" r="8.6"/><path d="M12 7v5.3l3.4 2"/></g>
+  <g id="g-ojo"><path d="M12 5c5 0 8.5 4.3 9.5 7-1 2.7-4.5 7-9.5 7s-8.5-4.3-9.5-7C3.5 9.3 7 5 12 5z"/><circle cx="12" cy="12" r="2.8"/></g>
+  <g id="g-aviso"><path d="M12 3.5l9 15.5H3l9-15.5z"/><path d="M12 9.5v4.2M12 16.6v.1"/></g>
+  <g id="g-tilde"><path d="M4.5 12.5l5 5L19.5 7"/></g>
+  <g id="g-si"><path d="M4.5 12.5l5 5L19.5 7"/></g>
+  <g id="g-no"><path d="M6 6l12 12M18 6L6 18"/></g>
+  <g id="g-reloj"><circle cx="12" cy="12" r="8.6"/><path d="M12 7v5.3l3.4 2"/></g>
+  <g id="g-candado"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></g>
+</defs></svg>
+
+<div class="app">
+  <header class="top" id="top" hidden>
+    <div class="centro">
+      <div class="barra"><i id="barra"></i></div>
+      <div class="top-txt">
+        <span><b id="seccion"></b> <span id="paso-txt"></span></span>
+        <!-- Tiene que estar en TODOS los pasos y no solo en la portada: al recargar, la
+             página retoma donde quedó y la portada no se vuelve a ver nunca. Si el
+             teléfono se presta a otra persona, esta es su única salida. -->
+        <a href="#" class="salida" onclick="confirmarReinicio(event)">¿No sos vos?</a>
+      </div>
     </div>
-  </div>
-  <div id="app"></div>
+  </header>
+
+  <main class="lienzo"><div class="centro" id="app"></div></main>
+
+  <footer class="pie" id="pie" hidden><div class="centro" id="pie-in"></div></footer>
 </div>
 
 <script>
@@ -94,10 +397,12 @@
    1. Sirve una VERSION DISTINTA del experimento a cada persona, tomada de los
       30 bloques D-eficientes generados por 07-Analisis/15_diseno_conjoint.py.
       Sin eso las utilidades parciales no se pueden estimar.
-   2. Aleatoriza el orden de las tareas y la posición de los planes en pantalla,
-      para que el orden no se confunda con la preferencia.
-   3. Guarda el progreso en el navegador, así una persona que cierra la pestaña
-      no empieza de nuevo (y no se pierde la respuesta a mitad de camino).
+   2. Aleatoriza el orden de las tareas, la posición de los planes en pantalla
+      y el orden de los atributos, para que el orden no se confunda con la
+      preferencia.
+   3. Guarda el progreso en el navegador y en el servidor paso por paso, así
+      una persona que cierra la pestaña no empieza de nuevo y una respuesta a
+      medio terminar no se pierde.
 
    El envío tiene DOS vias a propósito: si el endpoint falla, la página muestra
    la respuesta como texto para copiar y pegar. Una respuesta completa que se
@@ -107,32 +412,84 @@
 const CONFIG = {
   /* Dónde se guardan las respuestas. La tabla es append-only: la clave pública
      solo puede INSERTAR, no leer ni modificar nada, así que publicarla acá no
-     expone ninguna respuesta de nadie. Verificado contra la base. */
+     expone ninguna respuesta de nadie. Verificado contra la base el 14/10/2026,
+     después de que un grant perdido devolviera 401 en todos los guardados. */
   endpoint: "https://xbzkxqobxcioanjqvbfa.supabase.co/rest/v1/tesis_encuesta_respuestas",
   apikey: "sb_publishable_qIKtBUYy-Slm2gNnnxX28g_8u3TtK_X",
-  version: "cp3-2026-10-13"
+  version: "cp3-2026-10-15"
 };
 
 const DISENO = {"atributos":[{"nombre":"cuota","niveles":["$35.000","$70.000","$130.000","$240.000"]},{"nombre":"cubre","niveles":["2 salidas de fin de semana al año","3 de fin de semana, o 1 travesía de 5 a 7 días","5 de fin de semana, o 2 travesías"]},{"nombre":"garantia","niveles":["si no junta gente se cancela y te devuelven la plata","si no junta gente te reprograman con lugar asegurado","la salida se hace igual, aunque no junte gente"]},{"nombre":"grupo","niveles":["hasta 8 personas con 2 guías","hasta 12 personas con 2 guías","hasta 16 personas con 2 guías"]},{"nombre":"destinos","niveles":["sierras de Córdoba y Buenos Aires","sierras, Norte y Mendoza","sierras, Norte, Mendoza, Patagonia y países limítrofes"]},{"nombre":"reserva","niveles":["elegís cualquier fecha","en fines de semana largos el cupo de socios es limitado","solo podés reservar dentro de los 30 días previos"]}],"nAlt":3,"fijas":[[[2,0,2,0,1,2],[1,1,1,1,1,0],[2,0,2,2,1,2]],[[2,2,2,1,1,2],[3,2,0,1,0,2],[1,1,0,2,0,0]]],"bloques":[[[[1,2,2,1,0,1],[0,1,0,2,2,2],[2,0,1,0,1,0]],[[3,2,1,2,0,2],[0,0,2,0,2,1],[1,1,0,1,1,0]],[[1,0,1,2,2,0],[3,2,2,1,1,2],[2,1,0,0,0,1]],[[0,2,0,0,0,0],[2,0,1,1,2,2],[3,1,1,2,1,1]],[[3,0,0,1,2,1],[2,1,2,2,0,2],[0,2,1,0,1,0]],[[1,2,0,0,1,2],[3,1,2,2,2,0],[0,0,1,1,0,1]],[[1,1,1,0,0,1],[2,2,2,1,2,0],[0,0,0,2,1,2]],[[1,1,1,1,2,2],[2,2,0,2,1,1],[3,0,2,0,0,0]],[[0,2,1,2,2,1],[3,1,0,1,0,0],[1,0,2,0,1,2]],[[0,1,2,1,1,1],[1,0,0,2,0,0],[3,2,1,0,2,2]]],[[[0,2,1,2,0,0],[1,0,0,0,2,1],[2,1,2,1,1,2]],[[3,1,0,2,2,0],[2,2,2,0,0,2],[0,0,1,1,1,1]],[[1,0,1,2,0,2],[0,2,2,0,2,1],[2,1,0,1,1,0]],[[2,1,2,2,0,1],[3,2,1,1,2,0],[0,0,0,0,1,2]],[[2,1,1,0,2,2],[3,0,0,1,0,0],[1,2,2,2,1,1]],[[1,1,0,1,0,1],[2,2,1,0,1,0],[3,0,2,2,2,2]],[[0,0,2,2,1,0],[1,1,1,0,0,2],[2,2,0,1,2,1]],[[3,0,2,0,0,1],[0,1,1,1,2,2],[1,2,0,2,1,0]],[[0,1,2,0,0,0],[2,0,1,2,2,1],[3,2,0,1,1,2]],[[1,0,2,1,2,0],[3,1,1,0,1,1],[0,2,0,2,0,2]]],[[[0,0,0,0,2,2],[1,2,1,1,1,1],[3,1,2,2,0,0]],[[3,2,0,2,2,1],[1,1,2,1,1,2],[0,1,1,0,0,0]],[[0,1,2,1,0,1],[2,0,0,0,2,0],[1,2,1,2,1,2]],[[0,2,2,2,2,0],[3,1,1,0,1,2],[2,0,0,1,0,1]],[[1,0,2,0,0,1],[3,1,0,1,1,0],[2,2,1,2,2,2]],[[0,0,1,2,1,1],[2,2,2,0,0,2],[1,1,0,1,2,0]],[[1,1,2,2,2,1],[3,2,0,0,1,1],[2,0,1,1,0,0]],[[3,0,2,1,2,2],[2,1,0,2,1,1],[1,2,1,0,0,0]],[[2,1,1,1,2,1],[1,0,0,2,0,2],[0,2,2,0,1,0]],[[2,0,2,2,1,0],[3,1,1,0,2,1],[0,2,0,1,0,2]]],[[[0,0,1,0,1,2],[1,2,2,2,0,0],[3,1,0,1,2,1]],[[2,0,0,2,2,2],[3,2,2,0,0,1],[0,1,1,1,1,0]],[[0,2,0,0,2,0],[1,1,2,2,1,2],[3,0,1,1,0,1]],[[2,1,2,0,1,0],[3,0,1,1,2,2],[1,0,0,2,0,1]],[[2,0,0,0,1,1],[3,1,1,2,1,0],[0,2,2,1,0,2]],[[1,2,1,0,2,2],[2,1,0,1,0,0],[0,0,2,2,1,1]],[[2,2,2,1,1,2],[0,0,0,2,0,0],[1,1,1,0,2,1]],[[0,1,2,1,2,1],[2,0,1,0,0,0],[3,2,0,2,1,2]],[[1,0,2,1,1,0],[2,2,1,2,2,1],[3,1,0,0,0,2]],[[3,0,2,0,2,0],[1,2,0,1,1,1],[2,1,1,2,0,2]]],[[[1,0,0,1,2,0],[3,1,1,2,0,1],[2,2,2,0,1,2]],[[2,1,2,2,2,2],[0,0,1,1,1,1],[1,2,0,0,0,0]],[[3,2,1,1,0,2],[1,1,2,2,2,0],[2,0,0,0,1,1]],[[0,1,2,1,1,2],[2,0,1,2,0,0],[1,2,0,0,2,1]],[[3,2,2,2,1,1],[2,1,0,1,0,2],[0,0,1,0,2,0]],[[3,0,2,1,2,1],[0,1,0,0,0,0],[1,2,1,2,1,2]],[[3,0,0,0,2,2],[1,1,1,1,1,1],[0,2,2,1,0,0]],[[3,1,0,1,1,0],[2,0,2,2,0,1],[0,2,1,0,2,2]],[[3,1,1,0,1,0],[0,2,0,2,2,1],[1,0,2,1,0,2]],[[2,2,1,1,2,0],[1,1,2,0,0,1],[0,0,0,2,1,2]]],[[[2,1,1,2,0,1],[0,2,2,0,1,2],[3,0,0,1,2,0]],[[3,1,2,0,0,0],[2,2,1,1,1,2],[1,2,0,2,2,1]],[[0,1,0,1,0,2],[2,0,2,2,1,0],[3,2,1,0,2,1]],[[0,2,1,2,0,1],[1,1,0,1,1,0],[3,0,2,0,2,2]],[[3,0,1,2,1,0],[2,1,0,0,2,2],[1,2,2,1,0,1]],[[3,1,2,2,1,1],[0,0,1,1,2,2],[2,2,0,0,0,0]],[[0,1,2,1,1,1],[1,0,1,0,0,0],[3,2,0,2,2,2]],[[2,1,1,1,2,1],[0,2,0,0,1,0],[1,0,2,2,0,2]],[[0,1,2,2,2,0],[2,0,0,0,1,1],[3,2,1,1,0,2]],[[1,1,1,0,1,2],[0,0,0,2,0,1],[2,2,2,1,2,0]]],[[[0,1,0,2,1,0],[2,0,2,1,2,2],[1,2,1,0,0,1]],[[3,0,1,1,0,0],[2,0,0,0,1,1],[1,1,2,0,2,2]],[[2,1,0,1,0,0],[1,0,1,2,2,1],[0,2,2,0,1,2]],[[1,2,0,1,2,0],[3,1,2,0,0,1],[0,0,1,2,1,2]],[[2,2,2,2,0,0],[3,0,0,0,1,2],[0,1,1,1,2,1]],[[3,1,0,2,0,2],[2,2,1,0,1,0],[0,0,2,1,2,1]],[[3,0,0,0,2,0],[2,1,2,2,1,1],[0,2,1,1,0,2]],[[1,1,0,1,1,1],[0,0,2,0,0,0],[3,2,1,2,2,2]],[[0,1,1,0,2,0],[1,0,0,2,0,2],[3,2,2,1,1,1]],[[2,1,1,0,0,2],[1,0,2,1,1,0],[0,2,0,2,2,1]]],[[[3,1,1,1,1,1],[2,2,0,0,2,0],[1,0,2,2,0,2]],[[0,1,0,0,2,1],[1,2,2,1,1,0],[3,0,1,2,0,2]],[[2,1,2,0,1,2],[1,2,1,2,2,1],[0,0,0,1,0,0]],[[2,0,1,1,2,1],[3,2,2,0,0,2],[1,1,0,2,1,0]],[[2,2,1,1,0,0],[0,1,2,2,2,2],[1,0,0,0,1,1]],[[1,2,0,1,0,2],[0,0,1,2,1,0],[3,1,2,0,2,1]],[[2,1,0,2,0,1],[1,0,2,1,2,0],[0,2,1,0,1,2]],[[2,0,2,2,1,1],[3,2,0,1,2,2],[1,1,1,0,0,0]],[[2,0,0,0,1,2],[3,2,1,2,2,0],[0,1,2,1,0,1]],[[0,2,2,2,0,1],[1,1,1,1,2,2],[3,0,0,0,1,0]]],[[[0,2,2,1,0,1],[1,0,0,0,1,2],[3,1,1,2,2,0]],[[1,1,2,0,1,2],[0,0,0,2,0,1],[3,2,1,1,2,0]],[[0,2,1,0,1,0],[1,0,2,1,2,1],[3,1,0,2,0,2]],[[0,0,0,2,2,2],[2,2,1,0,0,1],[3,1,2,1,1,0]],[[3,2,0,0,2,1],[2,1,2,2,1,1],[1,0,1,1,0,0]],[[2,0,0,0,2,0],[0,1,0,1,1,1],[1,2,2,2,0,2]],[[0,0,2,0,0,0],[1,1,1,2,2,1],[2,2,0,1,1,2]],[[3,0,2,0,0,1],[1,2,0,2,1,0],[2,1,1,1,2,2]],[[2,2,2,2,2,0],[1,1,0,0,0,1],[3,0,1,1,1,2]],[[2,1,0,1,0,0],[3,0,1,2,1,1],[0,2,2,0,2,2]]],[[[2,1,1,0,1,0],[3,2,1,1,2,2],[0,0,2,2,0,1]],[[2,1,1,2,0,1],[0,2,2,0,1,2],[1,0,0,1,2,0]],[[0,1,0,2,0,2],[1,2,2,0,2,0],[3,0,1,1,1,1]],[[0,0,1,0,2,2],[2,2,0,1,0,0],[1,1,2,2,1,1]],[[1,2,1,2,0,2],[2,0,0,0,2,1],[0,2,2,1,1,0]],[[3,2,0,0,0,1],[2,0,1,2,1,0],[1,1,2,1,2,2]],[[3,1,2,0,0,0],[1,0,0,1,1,2],[0,2,1,2,2,1]],[[2,2,0,0,1,2],[3,0,2,2,2,0],[0,1,1,1,0,1]],[[1,0,1,0,0,0],[2,2,2,1,2,1],[3,1,0,2,1,2]],[[1,2,1,0,1,1],[0,1,0,2,2,0],[2,0,2,1,0,2]]],[[[1,2,1,0,0,2],[0,1,2,1,1,0],[2,0,0,2,2,1]],[[0,0,0,0,0,2],[3,2,2,1,1,1],[1,1,1,2,2,0]],[[1,0,2,2,0,1],[2,2,0,1,1,2],[3,1,1,0,2,0]],[[0,2,1,2,0,1],[3,1,0,1,1,2],[1,0,2,0,2,0]],[[2,1,2,1,0,2],[0,0,1,2,1,0],[3,2,0,0,2,1]],[[1,1,0,2,0,2],[3,0,2,0,1,1],[2,2,1,1,2,0]],[[2,0,2,0,0,0],[0,1,0,1,2,1],[3,2,1,2,1,2]],[[1,1,1,1,1,1],[0,2,2,0,2,2],[3,0,0,2,0,0]],[[1,0,1,1,2,2],[2,1,1,0,1,1],[3,2,2,2,0,0]],[[1,2,0,0,1,0],[3,0,1,1,0,1],[2,1,2,2,2,2]]],[[[1,2,0,2,0,1],[3,1,2,1,1,1],[2,0,1,0,2,0]],[[2,1,0,2,2,2],[3,0,2,0,0,1],[1,2,1,1,1,0]],[[0,2,2,0,1,2],[1,0,0,1,2,1],[3,1,1,2,0,0]],[[2,1,1,1,1,1],[1,0,2,0,2,2],[3,2,0,2,0,0]],[[3,0,1,2,1,2],[0,1,0,0,2,1],[2,2,2,1,0,0]],[[2,0,0,1,0,2],[0,2,1,2,2,1],[1,1,2,0,1,0]],[[2,2,0,0,1,1],[0,0,0,1,2,0],[1,1,1,2,0,2]],[[0,0,1,1,0,2],[3,2,0,0,1,0],[2,1,2,2,2,1]],[[0,1,1,0,0,0],[1,0,0,2,1,1],[3,2,2,1,2,2]],[[3,2,1,0,2,1],[1,1,0,1,0,2],[0,0,2,2,1,0]]],[[[0,1,1,1,2,2],[3,2,0,0,0,1],[1,0,2,2,1,0]],[[3,1,2,2,2,2],[2,2,1,0,0,0],[0,0,0,1,0,1]],[[2,2,0,0,2,2],[3,0,2,2,0,1],[1,1,1,1,1,0]],[[1,0,1,2,2,1],[3,2,0,1,1,0],[0,1,2,0,0,2]],[[1,2,2,0,2,1],[3,0,1,1,0,2],[2,1,0,2,1,0]],[[2,1,2,1,0,1],[3,2,1,2,1,2],[0,0,0,0,2,0]],[[2,0,2,1,1,1],[1,2,0,2,0,2],[3,1,1,0,2,0]],[[1,2,1,1,2,0],[2,1,0,2,0,1],[0,0,2,0,1,2]],[[0,2,1,2,1,1],[2,0,0,1,2,2],[1,1,2,0,0,0]],[[0,2,2,2,2,0],[1,1,0,0,1,1],[2,0,1,0,0,2]]],[[[3,0,1,0,0,1],[2,1,2,1,2,2],[1,2,0,2,1,0]],[[3,1,1,2,2,0],[2,0,2,1,1,1],[0,2,0,0,0,2]],[[0,2,2,0,2,1],[3,1,0,1,1,0],[1,0,1,2,0,2]],[[3,2,1,1,2,0],[2,0,0,0,2,1],[0,1,2,2,1,2]],[[3,0,2,0,1,2],[2,2,0,2,2,0],[0,1,1,1,0,1]],[[1,1,2,2,2,1],[0,0,0,1,0,0],[2,2,1,0,1,2]],[[1,1,2,0,0,0],[2,0,1,2,1,1],[3,2,0,1,2,2]],[[2,1,0,0,0,2],[1,2,1,1,1,1],[0,0,2,2,2,0]],[[0,1,1,0,1,0],[1,0,0,1,2,2],[3,2,2,2,0,1]],[[3,1,0,2,1,1],[2,2,2,1,0,0],[1,0,1,0,2,2]]],[[[2,1,1,0,1,0],[3,2,2,1,2,2],[1,0,0,2,0,1]],[[0,1,1,2,2,2],[2,2,2,0,0,0],[3,0,0,1,1,1]],[[3,2,1,0,0,1],[2,1,0,2,2,1],[0,0,2,1,1,0]],[[1,0,2,0,2,2],[0,1,0,1,1,1],[3,2,1,2,0,0]],[[2,1,1,1,0,2],[1,2,0,0,1,0],[0,0,2,2,2,1]],[[1,2,1,2,1,2],[3,1,0,0,2,0],[2,0,2,1,0,1]],[[1,0,0,1,0,0],[0,2,1,0,2,1],[3,1,2,2,1,2]],[[1,1,2,1,0,1],[0,2,0,0,1,2],[2,0,1,2,2,0]],[[2,2,2,2,1,1],[0,0,0,0,0,2],[1,1,1,1,2,0]],[[3,0,1,0,1,1],[0,1,2,2,0,0],[2,2,0,1,2,2]]],[[[0,2,0,2,0,0],[1,0,1,1,1,2],[2,1,2,0,2,1]],[[1,1,0,2,2,1],[2,2,2,1,1,2],[3,0,1,0,0,0]],[[1,2,2,0,0,1],[3,0,0,2,1,2],[0,1,1,1,2,0]],[[1,0,2,2,2,0],[2,2,1,0,1,1],[0,1,0,1,0,2]],[[1,1,0,1,1,0],[0,0,2,0,2,2],[3,2,1,2,0,1]],[[2,0,0,1,0,1],[3,1,1,0,1,2],[0,2,2,2,1,0]],[[3,2,0,0,2,0],[2,1,2,2,0,2],[0,0,1,1,1,1]],[[2,2,1,1,2,2],[0,1,0,2,1,1],[1,0,2,0,0,0]],[[1,2,1,2,2,2],[2,0,0,0,1,0],[3,1,2,1,0,1]],[[2,1,1,2,0,0],[3,0,2,1,2,1],[1,2,0,0,0,2]]],[[[1,1,2,2,0,0],[2,0,1,0,1,2],[0,2,0,1,2,1]],[[3,2,2,1,1,1],[2,0,1,2,2,0],[0,1,0,0,0,2]],[[2,2,0,2,1,1],[0,0,2,0,2,0],[1,1,1,1,0,2]],[[0,1,1,1,1,1],[3,2,2,0,2,2],[1,0,0,2,1,0]],[[0,0,2,0,0,1],[2,2,1,1,1,0],[3,1,0,2,2,2]],[[2,0,2,1,0,2],[1,2,0,2,2,1],[3,1,1,0,1,0]],[[2,1,0,1,2,0],[1,2,2,0,1,2],[3,0,1,2,0,1]],[[2,1,2,0,2,1],[0,2,1,2,0,0],[3,0,0,1,1,2]],[[1,0,1,1,2,1],[3,2,0,0,0,0],[0,1,2,2,1,2]],[[0,2,1,2,2,2],[3,0,2,1,1,0],[2,1,0,0,0,1]]],[[[0,0,2,2,1,2],[2,2,0,1,0,0],[3,1,1,0,2,1]],[[2,1,1,2,1,1],[3,2,2,1,2,0],[0,0,0,0,0,2]],[[0,1,2,1,0,1],[1,0,1,0,1,0],[2,2,0,2,2,2]],[[3,0,0,2,1,0],[0,2,2,0,2,1],[2,1,1,1,0,2]],[[1,1,0,1,2,2],[0,2,1,0,1,0],[3,0,2,2,0,1]],[[1,1,2,2,0,0],[3,2,1,1,1,2],[2,0,0,0,2,1]],[[1,2,0,2,0,1],[0,0,1,1,2,2],[2,1,2,0,1,0]],[[3,1,2,0,0,2],[0,2,0,2,1,1],[1,0,1,1,2,0]],[[3,1,0,1,1,1],[1,2,2,0,2,2],[2,0,1,2,0,0]],[[0,1,0,2,2,0],[3,2,1,0,0,2],[2,0,2,1,1,1]]],[[[3,0,2,1,2,0],[0,1,1,2,0,2],[1,2,0,2,1,1]],[[1,2,2,0,1,0],[2,1,1,1,0,1],[0,0,0,2,2,2]],[[2,0,0,0,2,1],[1,2,2,2,0,2],[3,1,1,1,1,0]],[[3,2,0,0,0,1],[1,1,2,2,2,0],[0,0,1,1,1,2]],[[3,2,1,2,2,2],[0,0,2,0,0,0],[1,1,0,1,1,1]],[[1,0,1,2,0,1],[2,1,2,0,1,2],[0,2,0,1,2,0]],[[0,1,0,2,1,0],[2,2,2,1,2,1],[1,0,1,0,0,2]],[[2,2,0,1,0,0],[3,0,2,2,1,2],[0,1,1,0,2,1]],[[3,0,2,2,0,1],[1,1,0,1,2,2],[2,2,1,0,1,0]],[[2,0,1,2,2,0],[3,1,0,0,0,2],[0,2,2,1,1,1]]],[[[3,0,0,2,0,1],[1,2,2,0,2,0],[0,1,2,1,1,2]],[[1,0,0,1,1,1],[3,1,2,0,0,0],[2,2,1,2,2,2]],[[0,2,1,2,1,1],[3,0,0,0,2,2],[2,1,2,1,0,2]],[[3,1,0,2,1,2],[2,2,2,0,0,1],[1,0,1,1,2,0]],[[0,0,1,0,0,2],[3,2,2,2,1,0],[2,1,0,1,2,1]],[[2,0,0,2,0,0],[3,2,2,1,2,2],[1,1,1,0,1,1]],[[1,1,2,2,0,1],[3,0,1,0,1,0],[2,2,0,1,1,2]],[[1,0,2,2,1,2],[3,2,1,1,0,1],[0,1,0,0,2,0]],[[2,1,1,1,1,0],[0,0,2,2,2,1],[1,2,0,0,0,2]],[[0,2,0,1,0,0],[2,0,2,0,1,1],[1,1,1,2,2,2]]],[[[3,1,2,2,0,0],[0,2,1,1,1,1],[1,0,0,0,2,2]],[[2,0,1,2,2,1],[3,1,0,1,1,2],[0,2,2,0,0,0]],[[2,2,2,0,2,2],[1,1,0,2,0,1],[0,0,1,1,1,0]],[[1,1,1,0,1,1],[2,0,0,1,0,0],[0,2,2,2,2,2]],[[1,1,2,1,2,1],[3,2,1,0,0,2],[0,0,0,2,1,2]],[[0,0,2,0,0,1],[1,2,0,2,1,0],[2,1,1,1,2,2]],[[1,0,1,0,0,2],[2,1,2,2,1,0],[3,2,0,1,2,1]],[[1,2,1,1,2,0],[0,1,0,2,0,2],[3,0,2,0,1,1]],[[3,0,1,2,2,0],[2,2,0,0,1,1],[0,1,2,1,0,2]],[[2,2,1,2,0,1],[0,1,0,0,2,0],[1,0,2,1,1,2]]],[[[0,0,1,1,1,2],[1,1,2,0,0,2],[2,2,0,2,2,1]],[[2,0,2,2,1,0],[0,2,0,1,0,2],[3,1,1,0,2,1]],[[3,2,1,1,0,2],[1,1,0,0,1,0],[0,0,2,1,2,1]],[[3,2,2,2,0,0],[0,0,1,0,2,2],[2,1,0,1,1,2]],[[1,2,1,1,2,0],[0,1,0,2,0,2],[3,0,2,0,1,1]],[[2,2,2,0,2,2],[3,0,0,1,1,0],[0,1,1,2,0,1]],[[1,2,0,1,1,1],[3,1,2,2,2,2],[2,0,1,0,0,0]],[[1,0,0,2,2,2],[0,2,2,0,1,0],[2,1,1,1,0,1]],[[3,1,0,1,2,0],[1,0,1,2,1,1],[2,2,2,0,0,2]],[[1,1,2,1,2,0],[3,0,0,0,0,1],[2,2,1,2,1,2]]],[[[2,2,1,0,2,2],[3,1,0,2,0,0],[1,0,2,1,1,1]],[[0,0,0,1,0,2],[3,2,1,0,1,0],[2,1,2,2,2,1]],[[3,0,1,1,1,1],[0,2,2,2,0,2],[1,1,0,0,2,0]],[[3,1,2,0,0,1],[2,2,0,2,1,0],[1,0,1,1,2,2]],[[2,1,1,1,0,0],[1,2,0,2,1,2],[0,0,0,0,2,1]],[[0,2,0,1,2,0],[2,0,2,0,1,2],[1,1,1,2,0,1]],[[2,1,0,1,1,2],[3,0,2,0,0,0],[0,2,1,2,2,1]],[[0,0,1,2,1,1],[3,1,0,1,2,2],[1,2,2,0,0,0]],[[2,0,0,2,0,0],[3,2,2,1,2,1],[0,1,1,0,1,2]],[[2,2,0,0,0,1],[3,0,1,2,2,2],[0,1,2,1,1,0]]],[[[1,2,1,1,1,1],[0,0,0,0,2,2],[2,1,2,2,0,0]],[[3,1,1,0,2,1],[0,0,0,1,0,0],[1,2,2,2,1,2]],[[2,1,0,2,0,2],[1,0,1,1,2,0],[0,2,2,0,1,1]],[[0,1,1,1,1,2],[3,2,2,0,0,0],[1,0,0,2,2,1]],[[2,0,1,0,1,2],[3,2,0,1,0,1],[0,1,2,2,2,0]],[[2,2,1,0,0,0],[3,0,2,2,1,1],[1,1,0,1,2,2]],[[3,2,1,2,2,2],[2,0,0,1,1,0],[1,1,2,0,0,1]],[[3,0,2,1,0,2],[1,2,1,2,2,0],[2,1,0,0,1,1]],[[2,2,2,1,2,2],[0,0,1,2,0,1],[3,1,0,0,1,0]],[[2,1,2,1,2,1],[0,2,0,2,1,0],[1,0,1,0,0,2]]],[[[1,0,1,2,2,0],[2,2,0,1,1,1],[0,1,2,0,0,2]],[[2,0,0,0,0,0],[1,2,1,2,2,2],[3,1,2,1,1,1]],[[0,2,1,2,1,1],[2,0,2,1,0,0],[1,1,0,0,2,2]],[[2,2,2,2,0,1],[0,1,1,0,1,0],[3,0,0,1,2,2]],[[2,1,1,2,2,2],[1,0,2,0,1,1],[0,2,0,1,0,0]],[[1,1,1,1,0,1],[3,2,2,0,2,0],[0,0,0,2,1,2]],[[3,1,0,2,1,0],[0,0,1,1,2,1],[1,2,2,0,0,2]],[[1,2,2,1,1,0],[3,0,1,2,0,2],[2,1,0,0,2,1]],[[2,0,1,0,1,0],[0,2,2,1,2,2],[1,1,0,2,0,1]],[[3,2,1,0,0,1],[2,1,1,1,1,2],[0,0,2,2,2,0]]],[[[1,0,2,1,2,1],[0,2,0,0,0,0],[2,1,1,2,1,2]],[[0,2,0,0,2,2],[3,1,2,2,0,1],[1,0,1,1,1,0]],[[1,0,1,0,2,1],[2,2,2,1,0,2],[3,1,0,1,1,0]],[[0,1,1,1,0,2],[2,0,0,2,2,0],[3,2,2,0,1,1]],[[3,0,1,1,2,2],[1,2,2,2,0,0],[2,1,0,0,1,1]],[[2,2,0,1,2,1],[1,1,1,0,0,2],[0,0,2,2,1,0]],[[1,1,0,1,0,1],[0,0,2,0,1,2],[3,2,1,2,2,0]],[[2,1,2,0,2,0],[3,0,0,2,0,2],[0,2,1,1,1,1]],[[3,2,2,0,1,2],[0,1,1,2,2,1],[2,0,0,1,0,0]],[[1,2,0,2,1,2],[0,1,2,1,2,0],[2,0,1,0,0,1]]],[[[2,0,0,1,2,1],[0,1,2,2,0,0],[3,2,1,0,1,2]],[[2,0,2,0,1,0],[0,1,1,2,0,1],[1,2,0,1,2,2]],[[3,1,2,1,2,2],[0,2,0,2,1,0],[2,0,1,0,0,1]],[[2,2,2,2,2,1],[1,0,1,1,0,0],[0,1,0,0,1,2]],[[3,2,2,0,0,1],[0,0,1,1,1,0],[1,1,0,2,2,2]],[[3,0,0,1,0,1],[1,2,2,0,2,0],[2,1,1,2,1,2]],[[2,2,1,1,0,2],[3,1,0,0,2,0],[1,0,2,2,1,1]],[[3,0,0,2,0,2],[2,1,2,1,1,0],[0,2,1,0,2,1]],[[0,2,2,1,0,2],[1,1,0,0,1,1],[3,0,1,2,2,0]],[[3,1,1,1,1,1],[2,2,0,2,0,0],[0,0,2,0,2,2]]],[[[3,1,2,2,2,2],[2,2,1,0,1,0],[0,0,0,1,0,1]],[[3,1,0,2,0,0],[1,0,1,1,1,2],[2,2,2,0,2,1]],[[2,1,1,1,0,2],[1,2,2,2,1,1],[3,0,0,0,2,0]],[[2,1,1,2,2,1],[0,2,0,0,0,0],[3,0,2,1,1,2]],[[2,1,0,0,1,2],[3,2,1,1,2,1],[1,0,2,2,0,0]],[[1,0,0,2,1,1],[0,1,2,1,2,0],[3,2,1,0,0,2]],[[3,0,1,0,0,1],[0,1,2,1,1,0],[2,2,0,2,2,2]],[[0,0,1,2,2,2],[3,2,0,1,1,0],[1,1,2,0,0,1]],[[2,0,0,1,0,1],[1,1,1,0,2,0],[0,2,2,2,1,2]],[[1,2,0,1,2,2],[2,0,2,2,0,0],[0,1,1,0,1,1]]],[[[1,2,1,2,0,0],[0,1,2,1,1,2],[3,0,0,0,2,1]],[[0,0,1,0,0,1],[3,2,2,2,1,2],[2,1,0,1,2,0]],[[0,2,0,1,2,1],[1,1,2,0,0,2],[2,0,1,2,1,0]],[[1,1,0,2,1,1],[3,2,1,1,0,0],[2,0,2,0,2,2]],[[1,1,1,0,2,0],[2,2,2,1,0,1],[3,0,0,2,1,2]],[[0,2,2,2,2,0],[3,1,1,0,1,1],[1,0,0,1,0,2]],[[2,2,1,0,0,2],[3,1,2,2,2,1],[1,0,0,1,1,0]],[[0,1,0,0,0,0],[2,0,1,1,1,1],[1,2,2,2,2,1]],[[3,2,1,1,2,2],[2,1,0,2,0,1],[0,0,2,0,1,0]],[[3,0,2,1,0,0],[2,2,0,0,1,1],[0,1,1,2,2,2]]],[[[0,2,0,1,2,2],[1,1,2,2,1,0],[3,0,1,0,0,1]],[[1,0,0,1,0,2],[2,2,1,2,1,1],[3,1,2,0,2,0]],[[0,1,2,2,0,1],[2,0,0,0,2,0],[3,2,1,1,1,2]],[[1,2,2,1,0,0],[2,0,1,2,2,2],[0,1,0,0,1,1]],[[1,2,2,0,2,1],[2,1,0,1,1,0],[0,0,1,2,0,2]],[[1,1,0,0,1,2],[0,2,1,2,0,0],[2,0,2,1,2,1]],[[2,2,2,0,1,2],[1,1,1,2,2,1],[0,0,0,0,0,0]],[[3,1,0,1,0,1],[1,0,1,0,1,0],[0,2,2,2,2,2]],[[3,2,0,2,2,0],[2,1,1,0,0,2],[0,0,2,1,1,1]],[[2,2,0,0,0,1],[0,1,1,1,2,0],[3,0,2,2,1,2]]]],"derror":0.19616};
-
 const ATR = DISENO.atributos;
+
+/* Cada atributo tiene tres textos y cada uno está para algo distinto:
+   · `t`  el nombre largo, para la glosa que se lee una vez antes de empezar.
+   · `b`  el rótulo de la columna izquierda de la matriz, que mide 78 px en
+          teléfono: si no es corto, pisa el valor de al lado.
+   · `q`  qué significa el atributo, también para la glosa.
+   El icono aparece en la glosa y en pantalla grande. */
 const ETIQ = {
-  cuota:    {titulo:"Cuota mensual",     ayuda:"Lo que pagás todos los meses, viajes o no"},
-  cubre:    {titulo:"Alcanza para",      ayuda:"El crédito se junta mes a mes"},
-  garantia: {titulo:"Si no junta gente", ayuda:"Hoy, si no llega al mínimo, se cancela"},
-  grupo:    {titulo:"Tamaño del grupo",  ayuda:"Cuántas personas y cuántos guías"},
-  destinos: {titulo:"Destinos",          ayuda:"Dónde podés usar el crédito"},
-  reserva:  {titulo:"Cómo reservás",     ayuda:"Cuándo podés elegir la fecha"}
+  cuota:    {t:"Cuota mensual",          b:"Cuota",           ic:"cuota",    q:"Lo que pagás todos los meses, viajes o no."},
+  cubre:    {t:"Alcanza para, por año",  b:"Findes al año",  ic:"cubre",    q:"Cuántos fines de semana cubre el crédito que juntás en un año. Una travesía de 5 a 7 días consume varios."},
+  garantia: {t:"Si no junta gente",      b:"Si no junta",     ic:"garantia", q:"Qué pasa cuando una salida no llega al mínimo de personas. Hoy, se cancela."},
+  grupo:    {t:"Tamaño del grupo",       b:"Grupo, 2 guías",  ic:"grupo",    q:"Cuántas personas como máximo van en cada salida. Siempre con dos guías."},
+  destinos: {t:"Destinos",               b:"Destinos",        ic:"destinos", q:"En qué zonas podés usar el crédito."},
+  reserva:  {t:"Para elegir fecha",      b:"Reservar",        ic:"reserva",  q:"Con cuánta libertad podés reservar el día que querés."}
 };
 const ORDEN_MOSTRAR = ["cubre","garantia","grupo","destinos","reserva"];
+
+/* Etiqueta corta de cada nivel. 🔴 No es un adorno, es la condición para que la
+   comparación de los tres planes entre en un teléfono. Con la frase completa del
+   diseño ("sierras, Norte, Mendoza, Patagonia y países limítrofes") la celda se
+   va a cuatro líneas, la pantalla pide 1.131 px y en un iPhone hay unos 700.
+   Cada etiqueta dice lo mismo que la frase larga, que queda íntegra en el
+   `title` de la celda, y el atributo se explica en la glosa previa. El dato que
+   se guarda es el índice del nivel, así que el análisis no se entera de esto.
+   La medida de referencia: celda de 93 px, así que el renglón principal tiene
+   unos 14 caracteres y el secundario unos 16. */
+const CORTO = {
+  cubre: [
+    {v:"2"},
+    {v:"3", s:"o 1 travesía"},
+    {v:"5", s:"o 2 travesías"}
+  ],
+  garantia: [
+    {v:"Se cancela",  s:"devuelven"},
+    {v:"Reprograman", s:"con lugar"},
+    {v:"Sale igual",  s:"sí o sí"}
+  ],
+  grupo: [
+    {v:"Hasta 8",  s:"personas"},
+    {v:"Hasta 12", s:"personas"},
+    {v:"Hasta 16", s:"personas"}
+  ],
+  /* Los tres niveles de destinos están anidados por diseño: cada uno incluye al
+     anterior. Por eso van con "+", y la glosa lo dice. La primera versión ponía
+     "Sierras" como renglón principal en los niveles 0 y 1, con la diferencia
+     escondida en el renglón chico: dos columnas que de un vistazo se leen
+     iguales se eligen como si fueran iguales, y eso empuja el coeficiente de
+     destinos hacia cero. */
+  destinos: [
+    {v:"Sierras",     s:"Córdoba, BA"},
+    {v:"+ Norte",     s:"y Mendoza"},
+    {v:"+ Patagonia", s:"y limítrofes"}
+  ],
+  /* Los tres se leen abajo del rótulo "Reservar", y por eso contrastan de a
+     pares: libre contra con cupo contra recién a 30 días. */
+  reserva: [
+    {v:"Libre",     s:"sin cupo"},
+    {v:"Con cupo",  s:"findes largos"},
+    {v:"A 30 días", s:"no antes"}
+  ]
+};
 
 /* ---------------------------------------------------------------- estado */
 const LS = "encuesta-montana-utdt";
 /* El canal de reclutamiento viene en la URL (?c=pauta, ?c=red, ?c=com) y no se le
    pregunta a la persona: preguntarlo da un dato malo, porque nadie se acuerda por dónde
    llegó. Es el dato que sostiene la promesa metodológica de reportar por canal, que es
-   la defensa contra el sesgo de autoselección. Si falta, queda "sin_etiqueta" y se
-   reporta como tal en lugar de inventarlo. */
+   la defensa contra el sesgo de autoselección. Si falta, queda "sin_etiqueta", se
+   reporta como tal y recién entonces se pregunta. */
 function canalDeUrl(){
   try {
     const c = (new URLSearchParams(location.search).get("c") || "").toLowerCase();
@@ -140,27 +497,32 @@ function canalDeUrl(){
   } catch(e) { return "sin_etiqueta"; }
 }
 
-let S = cargar() || {
-  id: nuevoId(),
-  bloque: Math.floor(Math.random()*DISENO.bloques.length),
-  iniciado: new Date().toISOString(),
-  canal: canalDeUrl(),
-  /* El dispositivo se registra solo, sin preguntar: sirve para leer el abandono, que
-     en encuestas largas se concentra en teléfono. */
-  pantalla: (typeof screen !== "undefined" ? screen.width + "x" + screen.height : "?"),
-  movil: /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent || ""),
-  paso: 0,
-  r: {},            // respuestas de las preguntas
-  elecciones: [],   // una por tarea
-  orden: null,      // orden aleatorio de las tareas
-  version: CONFIG.version
-};
-/* Si alguien retoma con otro link etiquetado, el canal del primer ingreso manda. */
-if (!S.canal) { S.canal = canalDeUrl(); guardar(); }
-
 function nuevoId(){
   return "r-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,8);
 }
+function estadoNuevo(){
+  return {
+    id: nuevoId(),
+    bloque: Math.floor(Math.random()*DISENO.bloques.length),
+    iniciado: new Date().toISOString(),
+    canal: canalDeUrl(),
+    /* El dispositivo se registra solo, sin preguntar: sirve para leer el abandono, que
+       en encuestas largas se concentra en teléfono. */
+    pantalla: (typeof screen !== "undefined" ? screen.width + "x" + screen.height : "?"),
+    movil: /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent || ""),
+    paso: 0,
+    r: {},            // respuestas de las preguntas
+    elecciones: [],   // una por tarea
+    orden: null,      // orden aleatorio de las tareas
+    ordenAtr: null,   // orden de los atributos dentro de la tarjeta
+    version: CONFIG.version
+  };
+}
+
+let S = cargar() || estadoNuevo();
+/* Si alguien retoma con otro link etiquetado, el canal del primer ingreso manda. */
+if (!S.canal) { S.canal = canalDeUrl(); guardar(); }
+
 function guardar(){
   try { localStorage.setItem(LS, JSON.stringify(S)); } catch(e){ /* modo privado */ }
 }
@@ -180,9 +542,11 @@ function cargar(){
    · Como cada envío es autosuficiente, un envío que falla no pierde nada: el
      siguiente lleva todo de nuevo. No hace falta reintentar lo viejo.
 
-   La tabla es append-only con un índice único por (respuesta, paso): reenviar el
-   mismo paso no duplica, devuelve conflicto y se ignora. Nunca bloquea a la persona:
-   si no hay red, la encuesta sigue y al final queda la vía de copiar y pegar.
+   La tabla es append-only con un índice único por (respuesta, paso, completo):
+   reenviar el mismo paso no duplica, devuelve 409 y se ignora. 🔴 El `completo`
+   tiene que estar en la clave: sin él, el envío final choca con el autoguardado
+   del último paso, devuelve 409, y la respuesta queda marcada como incompleta
+   para siempre mientras la persona ve "Listo, gracias".
 */
 let ultimoPasoEnviado = -1;
 
@@ -223,278 +587,7 @@ window.addEventListener("pagehide", () => {
   if (S.r.consentimiento && !S.terminado) sincronizar(false);
 });
 
-/* el orden de las tareas se fija una vez por persona */
-function ordenTareas(){
-  if (S.orden) return S.orden;
-  const n = DISENO.bloques[S.bloque].length;
-  const idx = [...Array(n).keys()];
-  for (let i=n-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [idx[i],idx[j]]=[idx[j],idx[i]]; }
-  // las fijas van intercaladas: una al principio del tramo, una al final, y la repetida al cierre
-  S.orden = {estimacion: idx, fijas:[0,1,0]};
-  guardar();
-  return S.orden;
-}
-
-/* ---------------------------------------------------------------- pasos */
-const app = document.getElementById("app");
-const PASOS = [];
-
-function P(render, valida){ PASOS.push({render, valida}); }
-
-/* ---- 0. portada y consentimiento */
-P(() => `
-  <h1>Cómo la gente organiza sus salidas de montaña</h1>
-  <p class="chico">Tesis de la Maestría en Management + Analytics, Universidad Torcuato Di Tella.
-  Responder lleva entre 9 y 10 minutos.</p>
-
-  <div class="tarjeta">
-    <h2 style="margin-top:0">Antes de empezar</h2>
-    <p><b>Para qué es.</b> Estoy estudiando cómo se decide y se organiza una salida de montaña
-    guiada en la Argentina, y qué valora la gente cuando la contrata. Es un trabajo académico y
-    no se usa para venderte nada.</p>
-    <p><b>Algo que corresponde que sepas.</b> Además de estudiar, soy socio de una empresa que
-    organiza salidas de montaña. Esta encuesta es parte de mi tesis, las respuestas no se usan
-    con fines comerciales y no te voy a contactar para ofrecerte nada.</p>
-    <p><b>Qué se guarda.</b> Tus respuestas y nada más. <b>No se pide tu nombre, tu teléfono ni
-    tu correo</b>, y no guardo tu dirección de IP junto con las respuestas. Se analizan todas
-    juntas, nunca de a una, y los resultados se publican solo de forma agregada. Se guardan en el
-    servidor de un proveedor externo, que puede estar fuera de la Argentina, y se borran cuando
-    la tesis se apruebe.</p>
-    <p><b>Qué pasa si abandonás.</b> Lo que vayas contestando <b>se guarda a medida que
-    avanzás</b>, también si cerrás la pestaña antes del final. Esas respuestas a medio terminar se
-    usan nada más que para saber en qué momento la gente deja la encuesta. Si te arrepentís,
-    avisame antes de llegar al final y la descarto.</p>
-    <p><b>Qué es obligatorio.</b> Es voluntario participar y podés cerrar la pestaña cuando
-    quieras. Si seguís, casi todas las preguntas hay que contestarlas, porque si falta una la
-    respuesta no entra en el análisis. Las de estudios e ingreso las podés saltear y la respuesta
-    sigue sirviendo.</p>
-    <p><b>Tus datos.</b> La respuesta no lleva nada que te identifique, así que una vez enviada no
-    puedo encontrarla para mostrártela, corregirla ni borrarla. Por eso, si querés retirarla,
-    tiene que ser antes de enviar.</p>
-    <p><b>Quién es responsable.</b> Martín Laborda, alumno de la Maestría en Management +
-    Analytics de la Universidad Torcuato Di Tella, legajo 24T3180, domicilio en [COMPLETAR].
-    Escribime a [COMPLETAR CORREO] por cualquier consulta o para pedirme los resultados cuando el
-    trabajo esté terminado. Mi director de tesis es [COMPLETAR NOMBRE], [COMPLETAR CORREO].</p>
-  </div>
-
-  <label class="opcion" id="op-cons">
-    <input type="checkbox" id="cons">
-    <span>Leí lo de arriba, tengo 18 años o más y acepto participar.</span>
-  </label>
-  <div class="err" id="e-cons" hidden>Hace falta aceptar para seguir.</div>
-  <div class="botones">
-    <button onclick="siguiente()">Empezar</button>
-    ${S.paso > 0 || Object.keys(S.r).length > 1
-      ? '<button class="sec" onclick="empezarDeNuevo()">Empezar de nuevo</button>' : ''}
-  </div>
-  ${S.paso > 0 || Object.keys(S.r).length > 1
-    ? '<p class="chico">Hay una encuesta a medio responder en este dispositivo. Si la empezó otra persona, usá «empezar de nuevo».</p>' : ''}
-`, () => {
-  const ok = document.getElementById("cons").checked;
-  document.getElementById("e-cons").hidden = ok;
-  if (ok && !S.r.consentimiento) {
-    S.r.consentimiento = new Date().toISOString();
-    guardar();
-  }
-  return ok;
-});
-
-/* ---- 1. filtro */
-P(() => `
-  <h2>Para empezar</h2>
-  ${radio("hizo", "En los últimos dos años, ¿hiciste alguna salida de montaña, trekking o travesía de al menos un día completo?",
-     ["Sí","No"])}
-  <div class="err" id="e-hizo" hidden>Elegí una opción.</div>
-  <div class="botones"><button onclick="siguiente()">Seguir</button></div>
-`, () => req("hizo","e-hizo"));
-
-/* ---- 2a. rama de quien NO hizo */
-P(() => S.r.hizo === "No" ? `
-  <h2>Un par de preguntas y pasamos a lo principal</h2>
-  ${radio("quiso","¿Alguna vez quisiste hacer una y no la hiciste?",
-     ["Sí, varias veces","Sí, alguna vez","No, nunca me lo planteé"])}
-  ${check("impidio","¿Qué te lo impidió? (podés marcar varias)",
-     ["El precio","No sabía con quién ir","No encontré una fecha que me sirviera",
-      "No me sentía en estado físico","No sabía si era para mí",
-      "No conocía operadores confiables","Falta de tiempo","Otra cosa"])}
-  ${num("prob_12m","¿Qué tan probable es que hagas una salida guiada en los próximos doce meses? (1 = imposible, 10 = segurísimo)",1,10)}
-  <div class="err" id="e-rama" hidden>Falta la primera pregunta.</div>
-  <div class="botones">
-    <button class="sec" onclick="anterior()">Volver</button>
-    <button onclick="siguiente()">Seguir</button>
-  </div>` : null,
-  () => req("quiso","e-rama"));
-
-/* ---- 2b. comportamiento pasado (solo practicantes) */
-P(() => S.r.hizo !== "Sí" ? null : `
-  <h2>Los últimos doce meses</h2>
-  <p class="chico">Si no te acordás exacto, poné tu mejor estimación. Es más útil un número
-  aproximado que un casillero vacío.</p>
-  ${num("k_cortas","¿Cuántas salidas <b>con guía o empresa</b> hiciste <b>de uno o dos días</b>?",0,40)}
-  ${num("k_largas","¿Y cuántas <b>con guía</b> de <b>tres días o más</b>?",0,40)}
-  ${num("k_propias","¿Cuántas hiciste <b>por tu cuenta</b>, sin guía ni empresa?",0,60)}
-  ${num("empresas","¿Con cuántas empresas distintas contrataste?",0,20)}
-  ${num("gasto_ultima","¿Cuánto pagaste por la <b>última</b> salida con guía? (en pesos)",0,99999999)}
-  ${num("gasto_llegar_ultima","¿Y cuánto gastaste <b>además</b> en llegar a esa salida: pasajes, nafta, peajes, hotel previo?",0,99999999)}
-  <div class="err" id="e-comp" hidden>Faltan las dos primeras.</div>
-  <div class="botones">
-    <button class="sec" onclick="anterior()">Volver</button>
-    <button onclick="siguiente()">Seguir</button>
-  </div>
-`, () => {
-  const ok = S.r.k_cortas !== undefined && S.r.k_largas !== undefined;
-  document.getElementById("e-comp").hidden = ok;
-  /* k es la suma, y se guarda derivado para no pedirlo dos veces. El modelo de planes
-     necesita las dos monedas por separado: un plan que cubre una travesía y una salida
-     de fin de semana al mismo precio se usa para la travesía, y eso es selección adversa
-     de catálogo. Con un k agregado no se puede asignar a nadie a un plan. */
-  if (ok) { S.r.k_guiadas = (S.r.k_cortas || 0) + (S.r.k_largas || 0); guardar(); }
-  return ok;
-});
-
-/* ---- 2c. cancelaciones (solo practicantes) */
-P(() => S.r.hizo !== "Sí" ? null : `
-  <h2>Cuando algo se cae</h2>
-  ${num("contrato_2a","En los <b>últimos dos años</b>, ¿cuántas salidas guiadas contrataste en total?",0,60)}
-  ${num("cancelo_2a","De esas, ¿a cuántas <b>te las canceló o reprogramó la empresa</b>?",0,
-        S.r.contrato_2a !== undefined ? S.r.contrato_2a : 60)}
-  ${S.r.contrato_2a !== undefined && S.r.cancelo_2a > S.r.contrato_2a
-      ? '<div class="err">No pueden ser más que las que contrataste.</div>' : ''}
-  ${num("sin_fecha","¿Cuántas veces quisiste hacer una salida y <b>no había ninguna fecha que te sirviera</b>?",0,40)}
-  ${S.r.cancelo_2a > 0 ? check("perdio","Además del dinero, ¿qué perdiste con esa cancelación?",
-     ["Nada, se resolvió bien","Los días que había pedido en el trabajo",
-      "Pasajes o reservas ya pagados","El entrenamiento que venía haciendo",
-      "Las ganas de volver a contratar ahí","Otra cosa"]) : ''}
-  <div class="err" id="e-can" hidden>Falta cuántas contrataste.</div>
-  <div class="botones">
-    <button class="sec" onclick="anterior()">Volver</button>
-    <button onclick="siguiente()">Seguir</button>
-  </div>
-`, () => {
-  const ok = S.r.contrato_2a !== undefined &&
-             !(S.r.cancelo_2a > S.r.contrato_2a);   // la inconsistencia pierde la fila entera
-  document.getElementById("e-can").hidden = ok;
-  return ok;
-});
-
-/* ---- 2d. intención futura: va en LAS DOS RAMAS.
-   Sin esto la brecha entre lo que la persona dice que haría y lo que hizo solo se puede
-   calcular entre fuentes distintas, no dentro de la misma persona, y esa brecha es el dato
-   del bloque del concepto. */
-P(() => `
-  <h2>Y el año que viene</h2>
-  ${num("k_intencion","Pensando en los <b>próximos doce meses</b>, ¿cuántas salidas <b>con guía o empresa</b> pensás hacer?",0,40)}
-  ${S.r.hizo === "No" ? radio("alguna_vez_guiada",
-      "¿Alguna vez hiciste una salida <b>con guía o empresa</b>, aunque haya sido hace más de dos años?",
-      ["Sí","No"]) : ''}
-  <div class="err" id="e-int" hidden>Falta el número. Si no pensás hacer ninguna, poné 0.</div>
-  <div class="botones">
-    <button class="sec" onclick="anterior()">Volver</button>
-    <button onclick="siguiente()">Seguir</button>
-  </div>
-`, () => req("k_intencion","e-int"));
-
-/* ---- 3. introducción al experimento + cheap talk */
-P(() => `
-  <h2>Ahora la parte principal</h2>
-  <p><b>Planes de suscripción para hacer montaña.</b> Funciona parecido a un gimnasio: pagás una
-  cuota todos los meses y vas juntando un crédito que después gastás en las salidas que elijas.</p>
-  <p>Vas a ver <b>tres planes por pantalla</b>, ${nTareas()} pantallas en total, y en cada una te
-  preguntamos dos cosas. <b>Van a aparecer combinaciones que hoy no existen en el mercado:
-  respondé como si existieran.</b></p>
-  <p class="chico">Para que tengas una referencia de precios de hoy: una salida de fin de semana
-  cuesta entre $280.000 y $500.000, y una travesía de cinco a siete días entre $850.000 y
-  $1.290.000.</p>
-
-  <div class="aviso">
-    <b>Algo que pasa siempre en estas encuestas.</b> Cuando a la gente le preguntan qué pagaría
-    por algo que todavía no existe, suele decir que pagaría más de lo que después realmente paga.
-    No es mala intención: en una encuesta la plata no sale del bolsillo.
-    <b>Te pedimos que elijas como si tuvieras que pagarlo de verdad este mes</b>, con la plata que
-    tenés, y sabiendo que ese dinero no lo vas a poder usar en otra cosa.
-  </div>
-  <div class="botones">
-    <button class="sec" onclick="anterior()">Volver</button>
-    <button onclick="siguiente()">Entendido, empecemos</button>
-  </div>
-`, () => true);
-
-/* ---- 4..N. las tareas del experimento */
-function nTareas(){ return DISENO.bloques[S.bloque].length + 3; }
-
-for (let t = 0; t < 13; t++) {
-  P(() => pintarTarea(t), () => validarTarea(t));
-}
-
-function tareaDe(i){
-  /* devuelve {perfiles, tipo, ref} — tipo: 'est' | 'fija'
-     Las fijas van en las posiciones 0, 6 y 12 (la última repite la primera fija). */
-  const o = ordenTareas();
-  if (i === 0)  return {perfiles: DISENO.fijas[0], tipo:"fija", ref:"fija-1"};
-  if (i === 6)  return {perfiles: DISENO.fijas[1], tipo:"fija", ref:"fija-2"};
-  if (i === 12) return {perfiles: DISENO.fijas[0], tipo:"fija", ref:"fija-1-repetida"};
-  const mapa = [null,0,1,2,3,4,null,5,6,7,8,9,null];
-  const k = mapa[i];
-  return {perfiles: DISENO.bloques[S.bloque][o.estimacion[k]], tipo:"est",
-          ref:"est-" + o.estimacion[k]};
-}
-
-function textoNivel(j, nivel){ return ATR[j].niveles[nivel]; }
-
-function pintarTarea(i){
-  const T = tareaDe(i);
-  const pos = posiciones(i, T.perfiles.length);
-  const yaEl = S.elecciones[i] || {};
-  let html = `<h2>Pantalla ${i+1} de 13</h2>
-    <p class="chico">¿Cuál de estos tres planes preferirías? Elegí uno aunque ninguno te
-    entusiasme: después te preguntamos si lo contratarías.</p>
-    <div class="planes">`;
-  pos.forEach((pIdx, vis) => {
-    const p = T.perfiles[pIdx];
-    const sel = yaEl.elegido === pIdx ? " sel" : "";
-    html += `<div class="plan-box${sel}" onclick="elegirPlan(${i},${pIdx})">
-      <div class="plan-cab">Plan ${"ABC"[vis]}</div>
-      <div class="plan-cuota">${textoNivel(0,p[0])}<small>por mes</small></div>`;
-    ordenAtributos().forEach(nom => {
-      const j = ATR.findIndex(a => a.nombre === nom);
-      html += `<div class="plan-fila"><b>${ETIQ[nom].titulo}</b>${textoNivel(j,p[j])}</div>`;
-    });
-    html += `</div>`;
-  });
-  /* 🔴 El texto cambia según la rama. Decirle "como hacés hoy" a alguien que no hizo
-     ninguna salida en dos años es falso, y la proporción de no compra es justamente el
-     estadístico con el que se prueba la tercera hipótesis: si la frase no aplica, el dato
-     no mide lo que se cree que mide. */
-  const practica = S.r.hizo === "Sí";
-  const alterna = practica ? "seguir comprando salida por salida, como hacés hoy"
-                           : "seguir como estás hoy, pagando cada salida cuando la hagas";
-  html += `</div>
-    <div class="recordatorio">Recordá que podés <b>no elegir ninguno</b> y ${alterna}. Si los
-    planes te parecen caros, esa es una respuesta perfectamente válida: te la preguntamos
-    abajo.</div>`;
-
-  if (yaEl.elegido !== undefined) {
-    html += `<div class="tarjeta">
-      <p style="margin-top:0"><b>${practica
-        ? "¿Contratarías ese plan, o seguirías comprando cada salida por separado?"
-        : "¿Contratarías ese plan, o seguirías como estás hoy?"}</b></p>
-      <p class="chico">${practica ? "Comprando por separado" : "Pagando cada salida suelta"}:
-      una salida de fin de semana con un operador del mercado cuesta <b>$280.000 al
-      contado</b>, o <b>3 cuotas fijas de $103.000</b> sobre un precio de lista de $309.000,
-      sin garantía de que se realice y en grupo de hasta 15 personas.</p>
-      ${radioEl(i,"compraria","",["Contrataría el plan que elegí",
-        practica ? "Seguiría comprando salida por salida"
-                 : "Seguiría como estoy, pagando cada salida cuando la haga"])}
-    </div>`;
-  }
-  html += `<div class="err" id="e-t${i}" hidden>Elegí un plan y después contestá la segunda pregunta.</div>
-    <div class="botones">
-      <button class="sec" onclick="anterior()">Volver</button>
-      <button onclick="siguiente()">Siguiente</button>
-    </div>`;
-  return html;
-}
-
+/* ---------------------------------------------- azar con semilla estable */
 function semillaDeId(){
   /* Hash del id del respondente, para que la permutación de pantalla varíe ENTRE personas
      y no solo entre pantallas. 🔴 Antes la semilla era (i+1)*constante, o sea que todos
@@ -521,7 +614,6 @@ function mulberry32(a){
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
-
 function mezclar(arr, semilla){
   const a = arr.slice();
   const rnd = mulberry32(semilla);
@@ -532,203 +624,125 @@ function mezclar(arr, semilla){
   }
   return a;
 }
-
 function posiciones(i, n){
   return mezclar([...Array(n).keys()], (semillaDeId() ^ Math.imul(i + 1, 2654435761)) | 0);
 }
-
 /* El orden de los atributos dentro de la tarjeta se mezcla UNA VEZ por respondente y se
    guarda: el primer atributo de una tarjeta pesa más que el último, así que dejarlo fijo
    para todos le regala importancia al mismo atributo en los 150 casos. La cuota va siempre
-   primera y aparte, porque es el ancla de precio. */
+   primera y aparte, porque es el ancla de precio y así se presenta en la literatura. */
 function ordenAtributos(){
   if (S.ordenAtr) return S.ordenAtr;
   S.ordenAtr = mezclar(ORDEN_MOSTRAR, semillaDeId());
   guardar();
   return S.ordenAtr;
 }
-
-window.elegirPlan = (i, pIdx) => {
-  S.elecciones[i] = Object.assign({}, S.elecciones[i], {elegido: pIdx, ts: Date.now()});
-  guardar(); pintar();
-};
-window.setEl = (i, campo, val) => {
-  S.elecciones[i] = Object.assign({}, S.elecciones[i], {[campo]: val});
-  guardar(); pintar();
-};
-
-function validarTarea(i){
-  const e = S.elecciones[i] || {};
-  const ok = e.elegido !== undefined && e.compraria !== undefined;
-  document.getElementById("e-t" + i).hidden = ok;
-  if (ok) {
-    const T = tareaDe(i);
-    S.elecciones[i].ref = T.ref;
-    S.elecciones[i].tipo = T.tipo;
-    S.elecciones[i].perfiles = T.perfiles;
-    guardar();
-  }
-  return ok;
+/* el orden de las tareas se fija una vez por persona */
+function ordenTareas(){
+  if (S.orden) return S.orden;
+  const n = DISENO.bloques[S.bloque].length;
+  const idx = [...Array(n).keys()];
+  for (let i=n-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [idx[i],idx[j]]=[idx[j],idx[i]]; }
+  S.orden = {estimacion: idx, fijas:[0,1,0]};
+  guardar();
+  return S.orden;
 }
 
-/* ---- certeza */
-P(() => `
-  <h2>Una última cosa sobre lo que elegiste</h2>
-  ${escala("certeza","¿Qué tan seguro estás de las elecciones que hiciste?",
-     "1 = nada seguro", "10 = completamente seguro")}
-  <div class="err" id="e-cert" hidden>Elegí un número.</div>
-  <div class="botones">
-    <button class="sec" onclick="anterior()">Volver</button>
-    <button onclick="siguiente()">Seguir</button>
-  </div>
-`, () => req("certeza","e-cert"));
+/* ------------------------------------------------------------- utilidades */
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;")
+  .replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function ico(nombre, tam){
+  const t = tam || 18;
+  return `<svg width="${t}" height="${t}" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+    ><use href="#g-${nombre}"/></svg>`;
+}
+function fallo(msg){
+  const e = document.getElementById("aviso-pie");
+  if (e) { e.textContent = msg; e.hidden = false; }
+  return false;
+}
+function bien(){
+  const e = document.getElementById("aviso-pie");
+  if (e) e.hidden = true;
+  return true;
+}
 
-/* ---- compromiso anual */
-P(() => `
-  <h2>Dos formas de pagar lo mismo</h2>
-  <p class="chico">Los dos planes son iguales en todo: mismas salidas, mismos destinos, mismas
-  condiciones. Lo único que cambia es el compromiso.</p>
-  ${radio("compromiso","¿Cuál elegirías?",
-    ["$70.000 por mes, me puedo dar de baja cuando quiera",
-     "$59.000 por mes, pero me comprometo por doce meses",
-     "Ninguno de los dos"])}
-  <div class="err" id="e-comp2" hidden>Falta elegir una.</div>
-  <div class="botones">
-    <button class="sec" onclick="anterior()">Volver</button>
-    <button onclick="siguiente()">Seguir</button>
-  </div>
-`, () => req("compromiso","e-comp2"));
-
-/* ---- mecanismo de acceso y meses sin viaje */
-P(() => `
-  <h2>Cómo debería funcionar</h2>
-  ${radio("mecanismo","Si te suscribís y querés viajar <b>antes</b> de haber juntado el crédito suficiente, ¿qué te parece más justo?",
-    ["Esperar hasta juntar el crédito",
-     "Viajar antes y pagar la diferencia de mi bolsillo",
-     "Que me adelanten el crédito a cambio de un compromiso de permanencia",
-     "Pagar un monto al inscribirme que me habilite desde el primer mes",
-     "Ninguna me convence"])}
-  ${num("meses_espera_n","Si el crédito se junta mes a mes, ¿cuántos meses estarías dispuesto a pagar antes de tu primera salida? (poné 0 si querrías usarlo desde el primer mes)",0,24)}
-  ${check("sin_viaje","En un mes en el que no viajás, ¿qué <b>dos cosas</b> te importarían más? (elegí hasta dos)",
-    ["Que el crédito se acumule y no se pierda nunca",
-     "Que se acumule, aunque tenga un vencimiento",
-     "Descuentos o beneficios en equipo y cursos",
-     "Poder pausar la cuota algunos meses al año",
-     "Nada en particular: entiendo que pago por tener el lugar asegurado"])}
-  ${radio("actualizacion","¿Cómo te parece que debería actualizarse la cuota con la inflación?",
-    ["Precio fijo en pesos por doce meses, aunque después suba de golpe",
-     "Ajuste automático cada tres meses por un índice público",
-     "Ajuste cuando el operador avise, con derecho a darme de baja",
-     "Cuota en dólares"])}
-  <div class="err" id="e-mec" hidden>Falta la primera.</div>
-  <div class="botones">
-    <button class="sec" onclick="anterior()">Volver</button>
-    <button onclick="siguiente()">Seguir</button>
-  </div>
-`, () => req("mecanismo","e-mec"));
-
-/* ---- perfil, al final a propósito */
-P(() => `
-  <h2>Para cerrar: sobre vos</h2>
-  <p class="chico">Estas preguntas sirven para comparar la muestra con las estadísticas oficiales
-  de turismo. Ninguna te identifica.</p>
-  ${radio("region","¿Dónde vivís?",
-    ["Ciudad de Buenos Aires","Provincia de Buenos Aires, Gran Buenos Aires",
-     "Provincia de Buenos Aires, resto","Córdoba","Santa Fe","Mendoza","Neuquén o Río Negro",
-     "Resto del país","Fuera de la Argentina"])}
-  ${radio("edad","¿Qué edad tenés?",
-    ["Menos de 25","25 a 34","35 a 44","45 a 54","55 a 64","65 o más"])}
-  ${radio("genero","¿Con qué género te identificás?",
-    ["Mujer","Varón","Otro","Prefiero no contestar"])}
-  ${radio("educacion","¿Cuál es el nivel de estudios más alto que completaste?",
-    ["Secundario o menos","Terciario o técnico","Universitario","Posgrado",
-     "Prefiero no contestar"])}
-  ${radio("ingreso_hogar","Sumando todo lo que entra por mes en tu casa, de todas las personas que aportan y después de descuentos, ¿en qué tramo cae?",
-    ["Hasta $800.000","Más de $800.000 y hasta $1.500.000",
-     "Más de $1.500.000 y hasta $2.500.000","Más de $2.500.000 y hasta $4.000.000",
-     "Más de $4.000.000 y hasta $6.000.000","Más de $6.000.000 y hasta $9.000.000",
-     "Más de $9.000.000","Prefiero no contestar"])}
-  ${num("personas_hogar","¿Cuántas personas viven en tu casa, contándote a vos y a los chicos?",1,15)}
-  ${radio("fin_de_mes","Pensando en todo lo que entra en tu casa, ¿cómo llegan a fin de mes?",
-    ["No alcanza y hay que pedir prestado","Justo, sin margen para ahorrar",
-     "Alcanza y queda algo","Alcanza bien y se puede ahorrar o invertir",
-     "Prefiero no contestar"])}
-  ${radio("cuota_otra","¿Pagás hoy alguna cuota mensual por deporte u ocio? (gimnasio, club, coach, alguna app)",
-    ["Sí, una","Sí, dos o más","No","No ahora, pero pagué antes"])}
-  ${S.canal === "sin_etiqueta" ? radio("como_llego","¿Por dónde llegaste a esta encuesta?",
-    ["Un aviso en Instagram o Facebook","Me la mandó alguien que conozco",
-     "Un grupo o comunidad de montaña","Otro lugar"]) : ''}
-  <div class="err" id="e-perf" hidden>Faltan región y edad.</div>
-  <div class="botones">
-    <button class="sec" onclick="anterior()">Volver</button>
-    <button onclick="enviar()">Enviar respuestas</button>
-  </div>
-`, () => {
-  const ok = S.r.region !== undefined && S.r.edad !== undefined;
-  document.getElementById("e-perf").hidden = ok;
-  return ok;
-});
-
-/* ---------------------------------------------------- helpers de widgets */
-function radio(campo, texto, ops){
-  let h = texto ? `<p><b>${texto}</b></p>` : "";
-  ops.forEach(o => {
-    const sel = S.r[campo] === o ? " sel" : "";
-    h += `<label class="opcion${sel}"><input type="radio" name="${campo}"
-      ${S.r[campo]===o?"checked":""} onchange="setR('${campo}', this.dataset.v)"
-      data-v="${esc(o)}"><span>${o}</span></label>`;
+/* ------------------------------------------------------ widgets de pregunta */
+/* Las opciones aceptan dos formas: un texto (se guarda y se muestra igual) o
+   {v, l, s} con v = lo que se guarda, l = lo que se muestra, s = subtexto.
+   Separar las dos cosas permite mostrar "de $800 mil a $1,5 M" y guardar
+   "Más de $800.000 y hasta $1.500.000", que es lo que no deja ninguna duda
+   al analizar. */
+function norm(o){
+  return (typeof o === "string") ? {v:o, l:o} : {v:o.v, l:o.l || o.v, s:o.s};
+}
+/* Cada pregunta vuelve envuelta en un solo `.bloque`: así la pregunta y sus
+   opciones quedan pegadas (9 px) y la separación grande (14 px) queda entre
+   preguntas. Si cada widget devolviera dos hermanos sueltos, el gap del lienzo
+   se metería entre el enunciado y sus opciones y en pantalla se leería como si
+   las opciones fueran de otra cosa. */
+function radio(campo, texto, ops, modo){
+  const fichas = modo === "fichas";
+  let h = `<div class="bloque">`;
+  h += texto ? `<span class="preg">${texto}</span>` : "";
+  h += fichas ? `<div class="fichas">` : `<div class="lista">`;
+  ops.map(norm).forEach(o => {
+    const on = S.r[campo] === o.v;
+    h += fichas
+      ? `<label class="ficha${on?" on":""}" title="${esc(o.v)}"><input type="radio" name="${campo}"
+           ${on?"checked":""} data-v="${esc(o.v)}" onchange="setR('${campo}',this.dataset.v)">${o.l}</label>`
+      : `<label class="op${on?" on":""}"><input type="radio" name="${campo}"
+           ${on?"checked":""} data-v="${esc(o.v)}" onchange="setR('${campo}',this.dataset.v)"
+           ><span class="marca"><i></i></span><span>${o.l}${o.s?`<span class="sub">${o.s}</span>`:""}</span></label>`;
   });
-  return h;
+  return h + `</div></div>`;
 }
-function radioEl(i, campo, texto, ops){
-  let h = texto ? `<p><b>${texto}</b></p>` : "";
-  const e = S.elecciones[i] || {};
-  ops.forEach(o => {
-    const sel = e[campo] === o ? " sel" : "";
-    h += `<label class="opcion${sel}"><input type="radio" name="${campo}-${i}"
-      ${e[campo]===o?"checked":""} onchange="setEl(${i},'${campo}', this.dataset.v)"
-      data-v="${esc(o)}"><span>${o}</span></label>`;
-  });
-  return h;
-}
-function check(campo, texto, ops){
-  let h = `<p><b>${texto}</b></p>`;
+function check(campo, texto, ops, modo){
+  const fichas = modo === "fichas";
   const act = S.r[campo] || [];
-  ops.forEach(o => {
-    const sel = act.includes(o) ? " sel" : "";
-    h += `<label class="opcion${sel}"><input type="checkbox"
-      ${act.includes(o)?"checked":""} onchange="togR('${campo}', this.dataset.v)"
-      data-v="${esc(o)}"><span>${o}</span></label>`;
+  let h = `<div class="bloque">`;
+  h += texto ? `<span class="preg">${texto}</span>` : "";
+  h += fichas ? `<div class="fichas">` : `<div class="lista">`;
+  ops.map(norm).forEach(o => {
+    const on = act.includes(o.v);
+    h += fichas
+      ? `<label class="ficha${on?" on":""}" title="${esc(o.v)}"><input type="checkbox"
+           ${on?"checked":""} data-v="${esc(o.v)}" onchange="togR('${campo}',this.dataset.v)">${o.l}</label>`
+      : `<label class="op cuadro${on?" on":""}"><input type="checkbox"
+           ${on?"checked":""} data-v="${esc(o.v)}" onchange="togR('${campo}',this.dataset.v)"
+           ><span class="marca"><i></i></span><span>${o.l}</span></label>`;
   });
-  return h;
+  return h + `</div></div>`;
 }
 /* Campo numérico que acepta cómo la gente escribe de verdad.
    🔴 Antes era <input type="number">, y ahí "1.200.000" tecleado con puntos devuelve
    value = "": la persona veía su número en la caja y el dato no se guardaba en ningún
    lado. Pasa justo en las preguntas de plata, que son las más caras de volver a pedir.
-   Ahora es text, se limpian los separadores, y debajo se muestra lo que QUEDÓ guardado,
-   que es la única forma de que un recorte por tope no sea invisible. */
+   Ahora es text, se limpian los separadores, y al lado de la pregunta se muestra lo que
+   QUEDÓ guardado, que es la única forma de que un recorte por tope no sea invisible. */
 function num(campo, texto, min, max){
   const g = S.r[campo];
-  const v = g !== undefined ? g : "";
   const plata = max > 10000;
   const eco = g !== undefined
-    ? `<div class="chico" style="margin-top:3px">Guardado: <b>${plata ? "$" : ""}${g.toLocaleString("es-AR")}</b></div>`
-    : "";
-  return `<label><b>${texto}</b>
-    <input type="text" inputmode="numeric" autocomplete="off" value="${v}"
-      oninput="setNum('${campo}', this.value, ${min}, ${max})">${eco}</label>`;
+    ? `<span class="eco">${plata?"$":""}${g.toLocaleString("es-AR")}</span>` : "";
+  return `<div class="campo" data-campo="${campo}">
+    <div class="cab"><label class="preg" for="f-${campo}">${texto}</label>${eco}</div>
+    <div class="caja-num">${plata?`<span class="sig">$</span>`:""}
+      <input id="f-${campo}" type="text" inputmode="numeric" autocomplete="off"
+        value="${g !== undefined ? g : ""}"
+        oninput="setNum('${campo}', this.value, ${min}, ${max})"></div>
+  </div>`;
 }
 function escala(campo, texto, izq, der){
-  let h = `<p><b>${texto}</b></p><div class="escala">`;
+  let h = `<div class="bloque"><span class="preg">${texto}</span><div class="escala">`;
   for (let i=1;i<=10;i++){
-    h += `<button class="${S.r[campo]===i?"sel":""}" onclick="setR('${campo}',${i})">${i}</button>`;
+    h += `<button type="button" class="${S.r[campo]===i?"on":""}"
+      onclick="setR('${campo}',${i})">${i}</button>`;
   }
-  h += `</div><div class="chico" style="display:flex;justify-content:space-between">
-    <span>${izq}</span><span>${der}</span></div>`;
-  return h;
+  return h + `</div><div class="extremos"><span>${izq}</span><span>${der}</span></div></div>`;
 }
-function esc(s){ return String(s).replace(/"/g,"&quot;"); }
+
 window.setR = (c,v) => { S.r[c] = v; guardar(); pintar(); };
 window.togR = (c,v) => {
   const a = S.r[c] || [];
@@ -759,36 +773,559 @@ window.setNum = (c,v,min,max) => {
      sin repintar, el input se queda con el tope viejo y acepta un valor que después rebota. */
   if (c === "contrato_2a" && cambio) { pintar(); return; }
   /* Repintar solo cuando el valor guardado difiere de lo tecleado (un recorte por tope),
-     para que el eco de abajo no mienta. Repintar siempre movería el cursor en cada letra. */
-  if (cambio && String(n) !== limpio) pintar();
-  else if (cambio) {
-    const lab = document.activeElement && document.activeElement.closest("label");
-    if (lab) {
-      const eco = lab.querySelector(".chico");
+     para que el eco de al lado no mienta. Repintar siempre movería el cursor en cada letra. */
+  if (cambio && String(n) !== limpio) { pintar(); return; }
+  if (cambio) {
+    const caja = document.querySelector('.campo[data-campo="'+c+'"] .cab');
+    if (caja) {
       const plata = max > 10000;
-      if (eco) eco.innerHTML = 'Guardado: <b>' + (plata ? "$" : "") + n.toLocaleString("es-AR") + '</b>';
-      else lab.insertAdjacentHTML("beforeend",
-        '<div class="chico" style="margin-top:3px">Guardado: <b>' +
-        (plata ? "$" : "") + n.toLocaleString("es-AR") + '</b></div>');
+      const txt = (plata ? "$" : "") + n.toLocaleString("es-AR");
+      let eco = caja.querySelector(".eco");
+      if (eco) eco.textContent = txt;
+      else caja.insertAdjacentHTML("beforeend", '<span class="eco">' + txt + '</span>');
     }
   }
 };
-function req(campo, errId){
-  const ok = S.r[campo] !== undefined;
-  const e = document.getElementById(errId);
-  if (e) e.hidden = ok;
-  return ok;
+function req(campo, msg){ return S.r[campo] !== undefined ? bien() : fallo(msg); }
+
+/* ============================================================== los pasos */
+const app = document.getElementById("app");
+const PASOS = [];
+/* `visible` es una función aparte y no "render() devolvió null": así calcular
+   cuántos pasos hay no obliga a construir el HTML de las trece pantallas del
+   experimento en cada repintado. */
+function P(render, valida, extra){
+  PASOS.push(Object.assign({render, valida, visible: () => true, seccion: ""}, extra || {}));
+}
+function pieEstandar(txt, accion, sinVolver){
+  return `<div class="aviso-err" id="aviso-pie" hidden></div>
+    <div class="acciones">
+      ${sinVolver ? "" : `<button type="button" class="sec" onclick="anterior()">Volver</button>`}
+      <button type="button" class="pri" onclick="${accion || "siguiente()"}">${txt || "Seguir"}</button>
+    </div>`;
 }
 
-/* ---------------------------------------------------- navegación */
-function pasosVisibles(){
-  return PASOS.map((p,i) => ({p,i})).filter(x => x.p.render() !== null);
+/* ---- 0. portada y consentimiento ------------------------------------- */
+/* El consentimiento es largo porque tiene que serlo. Para que la portada entre
+   en una pantalla, lo material queda a la vista y el detalle queda en bloques
+   que se abren: la información sigue estando completa y se lee más que un muro
+   de texto que nadie abre. */
+P(() => `
+  <h1>Cómo la gente organiza sus salidas de montaña</h1>
+  <p class="intro">Tesis de la Maestría en Management + Analytics, Universidad Torcuato Di Tella.
+  Responder lleva unos diez minutos y se guarda a medida que avanzás.</p>
+
+  <div class="caja">
+    <div class="bloque">
+      <p style="font-size:.90rem;line-height:1.42"><b>Para qué es.</b> Estudio cómo se decide y
+      se organiza una salida de montaña guiada en la Argentina, y qué valora la gente cuando la
+      contrata. Es un trabajo académico y no se usa para venderte nada.</p>
+      <p style="font-size:.90rem;line-height:1.42"><b>Algo que corresponde que sepas.</b> Además
+      de estudiar, soy socio de una empresa que organiza salidas de montaña. Las respuestas no se
+      usan con fines comerciales y no te voy a contactar para ofrecerte nada.</p>
+      <p style="font-size:.90rem;line-height:1.42"><b>No se pide tu nombre, tu teléfono ni tu
+      correo</b>, y tampoco se guarda tu dirección de IP. Participar es voluntario y podés cerrar
+      la pestaña cuando quieras.</p>
+    </div>
+  </div>
+
+  <details class="mas"><summary>Qué se guarda, dónde, y qué pasa si abandonás</summary><div>
+    <p>Tus respuestas y nada más. Se analizan todas juntas, nunca de a una, y los resultados se
+    publican solo de forma agregada. Se guardan en el servidor de un proveedor externo, que puede
+    estar fuera de la Argentina, y se borran cuando la tesis se apruebe.</p>
+    <p>Lo que vayas contestando se guarda a medida que avanzás, también si cerrás la pestaña antes
+    del final. Esas respuestas a medio terminar se usan nada más que para saber en qué momento la
+    gente deja la encuesta. Si te arrepentís, avisame antes de llegar al final y la descarto.</p>
+  </div></details>
+  <details class="mas"><summary>Qué es obligatorio contestar</summary><div>
+    <p>Si seguís, casi todas las preguntas hay que contestarlas, porque si falta una la respuesta
+    no entra en el análisis. Las de estudios e ingreso las podés saltear y la respuesta sigue
+    sirviendo.</p>
+    <p>La respuesta no lleva nada que te identifique, así que una vez enviada no puedo encontrarla
+    para mostrártela, corregirla ni borrarla. Por eso, si querés retirarla, tiene que ser antes
+    de enviar.</p>
+  </div></details>
+  <details class="mas"><summary>Quién es responsable</summary><div>
+    <p>Martín Laborda, alumno de la Maestría en Management + Analytics de la Universidad Torcuato
+    Di Tella, legajo 24T3180, domicilio en [COMPLETAR]. Escribime a [COMPLETAR CORREO] por
+    cualquier consulta o para pedirme los resultados cuando el trabajo esté terminado. Mi director
+    de tesis es [COMPLETAR NOMBRE], [COMPLETAR CORREO].</p>
+  </div></details>
+
+  ${hayAvance() ? `<p class="micro">Hay una encuesta a medio responder en este dispositivo.
+    Si la empezó otra persona, usá «empezar de nuevo».</p>` : ""}
+`, () => document.getElementById("cons").checked
+      ? bien()
+      : fallo("Hace falta aceptar para seguir."),
+  /* 🔴 La casilla de consentimiento va en la barra de acción y no al final del
+     texto. Es la única pantalla que no entra completa (el consentimiento tiene
+     que decir todo lo que dice), así que con la casilla abajo del pliegue la
+     persona veía el botón «Empezar» sin ver qué estaba aceptando: apretaba,
+     recibía un error y recién ahí se enteraba. Con la casilla pegada al botón,
+     lo que se acepta y el acto de aceptar están siempre juntos. */
+  {pie: () => `
+    <label class="op${S.r.consentimiento?" on":""}" style="margin:0">
+      <input type="checkbox" id="cons" ${S.r.consentimiento?"checked":""}
+        onchange="marcarCons(this.checked)">
+      <span class="marca"><i></i></span>
+      <span>Leí lo de arriba, tengo 18 años o más y acepto participar.</span>
+    </label>
+    <div class="aviso-err" id="aviso-pie" hidden></div>
+    <div class="acciones">
+      ${hayAvance() ? `<button type="button" class="sec" onclick="empezarDeNuevo()">Empezar de nuevo</button>` : ""}
+      <button type="button" class="pri" onclick="siguiente()">Empezar</button>
+    </div>`});
+
+function hayAvance(){ return S.paso > 0 || Object.keys(S.r).length > 1; }
+window.marcarCons = (ok) => {
+  if (ok && !S.r.consentimiento) S.r.consentimiento = new Date().toISOString();
+  if (!ok) delete S.r.consentimiento;
+  guardar(); pintar();
+};
+
+/* ---- 1. filtro ------------------------------------------------------- */
+P(() => `
+  <h2>¿Hiciste montaña últimamente?</h2>
+  <p class="intro">En los últimos dos años, ¿hiciste alguna salida de montaña, trekking o
+  travesía de al menos un día completo?</p>
+  <div class="dos">
+    <label class="grande${S.r.hizo==="Sí"?" on":""}">
+      <input type="radio" name="hizo" ${S.r.hizo==="Sí"?"checked":""}
+        onchange="setR('hizo','Sí')">
+      ${ico("si",26)}<b>Sí, hice</b><em>Una o varias</em></label>
+    <label class="grande${S.r.hizo==="No"?" on":""}">
+      <input type="radio" name="hizo" ${S.r.hizo==="No"?"checked":""}
+        onchange="setR('hizo','No')">
+      ${ico("no",26)}<b>No, ninguna</b><em>En estos dos años</em></label>
+  </div>
+`, () => req("hizo","Elegí una de las dos."), {seccion:"Tus salidas"});
+
+/* ---- 2. rama de quien NO hizo ---------------------------------------- */
+P(() => `
+  <h2>Un par de preguntas y pasamos a lo principal</h2>
+  ${radio("quiso","¿Alguna vez quisiste hacer una y no la hiciste?",
+     ["Sí, varias veces","Sí, alguna vez","No, nunca me lo planteé"], "fichas")}
+  ${check("impidio","¿Qué te lo impidió? Podés marcar varias.",
+     ["El precio","No sabía con quién ir","No encontré fecha",
+      "No me sentía en estado físico","No sabía si era para mí",
+      "No conocía operadores confiables","Falta de tiempo","Otra cosa"], "fichas")}
+  <div class="bloque">${num("prob_12m","¿Qué tan probable es que hagas una salida guiada en los próximos doce meses? De 1, imposible, a 10, segurísimo.",1,10)}</div>
+`, () => req("quiso","Falta la primera pregunta."),
+  {visible: () => S.r.hizo === "No", seccion:"Tus salidas"});
+
+/* ---- 3. comportamiento pasado: cuántas ------------------------------- */
+P(() => `
+  <h2>Los últimos doce meses</h2>
+  <p class="intro">Si no te acordás exacto, poné tu mejor estimación. Es más útil un número
+  aproximado que un casillero vacío.</p>
+  ${num("k_cortas","Salidas <b>con guía o empresa</b>, de uno o dos días",0,40)}
+  ${num("k_largas","Con guía, de <b>tres días o más</b>",0,40)}
+  ${num("k_propias","Por tu cuenta, <b>sin guía ni empresa</b>",0,60)}
+  ${num("empresas","¿Con cuántas empresas distintas contrataste?",0,20)}
+`, () => {
+  const ok = S.r.k_cortas !== undefined && S.r.k_largas !== undefined;
+  if (!ok) return fallo("Faltan las dos primeras: las de uno o dos días y las de tres o más.");
+  /* k es la suma, y se guarda derivado para no pedirlo dos veces. El modelo de planes
+     necesita las dos monedas por separado: un plan que cubre una travesía y una salida
+     de fin de semana al mismo precio se usa para la travesía, y eso es selección adversa
+     de catálogo. Con un k agregado no se puede asignar a nadie a un plan. */
+  S.r.k_guiadas = (S.r.k_cortas || 0) + (S.r.k_largas || 0);
+  guardar();
+  return bien();
+}, {visible: () => S.r.hizo === "Sí", seccion:"Tus salidas"});
+
+/* ---- 4. comportamiento pasado: cuánto costó -------------------------- */
+P(() => `
+  <h2>Lo que salió la última</h2>
+  <p class="intro">De la última salida que hiciste con guía. Si fue hace mucho, poné lo que
+  recuerdes.</p>
+  ${num("gasto_ultima","¿Cuánto pagaste por la salida?",0,99999999)}
+  ${num("gasto_llegar_ultima","¿Y cuánto gastaste <b>además</b> en llegar: pasajes, nafta, peajes, hotel previo?",0,99999999)}
+  <p class="micro">Los dos números sirven para medir cuánto del gasto total de una salida se va
+  en cosas que no son la salida.</p>
+`, () => S.r.gasto_ultima !== undefined ? bien()
+      : fallo("Falta lo que pagaste por la salida. Si no te acordás, poné una estimación."),
+  {visible: () => S.r.hizo === "Sí", seccion:"Tus salidas"});
+
+/* ---- 5. cancelaciones ------------------------------------------------ */
+P(() => `
+  <h2>Cuando algo se cae</h2>
+  ${num("contrato_2a","En los <b>últimos dos años</b>, ¿cuántas salidas guiadas contrataste en total?",0,60)}
+  ${num("cancelo_2a","De esas, ¿a cuántas <b>te las canceló o reprogramó la empresa</b>?",0,
+        S.r.contrato_2a !== undefined ? S.r.contrato_2a : 60)}
+  ${num("sin_fecha","¿Cuántas veces quisiste hacer una salida y <b>no había ninguna fecha que te sirviera</b>?",0,40)}
+  ${S.r.cancelo_2a > 0 ? `${check("perdio","Además del dinero, ¿qué perdiste con esa cancelación?",
+     ["Nada, se resolvió bien","Días pedidos en el trabajo",
+      "Pasajes o reservas ya pagados","El entrenamiento que venía haciendo",
+      "Las ganas de volver a contratar ahí","Otra cosa"], "fichas")}` : ""}
+`, () => {
+  if (S.r.contrato_2a === undefined) return fallo("Falta cuántas contrataste. Si no contrataste ninguna, poné 0.");
+  /* la inconsistencia pierde la fila entera, así que no se deja pasar */
+  if (S.r.cancelo_2a > S.r.contrato_2a) return fallo("Las canceladas no pueden ser más que las contratadas.");
+  return bien();
+}, {visible: () => S.r.hizo === "Sí", seccion:"Tus salidas"});
+
+/* ---- 6. intención futura: va en LAS DOS RAMAS ------------------------ */
+/* Sin esto la brecha entre lo que la persona dice que haría y lo que hizo solo se puede
+   calcular entre fuentes distintas, no dentro de la misma persona, y esa brecha es el dato
+   del bloque del concepto. */
+P(() => `
+  <h2>Y el año que viene</h2>
+  ${num("k_intencion","Pensando en los <b>próximos doce meses</b>, ¿cuántas salidas <b>con guía o empresa</b> pensás hacer?",0,40)}
+  ${S.r.hizo === "No" ? `${radio("alguna_vez_guiada",
+      "¿Alguna vez hiciste una salida <b>con guía o empresa</b>, aunque haya sido hace más de dos años?",
+      ["Sí","No"], "fichas")}` : ""}
+`, () => req("k_intencion","Falta el número. Si no pensás hacer ninguna, poné 0."),
+  {seccion:"Tus salidas"});
+
+/* ---- 7. cómo funciona un plan --------------------------------------- */
+P(() => `
+  <h2>Ahora la parte principal</h2>
+  <p class="intro"><b>Planes de suscripción para hacer montaña.</b> Hoy no existen en el
+  mercado argentino. Funcionarían parecido a un gimnasio.</p>
+  <div class="caja">
+    <div class="pasos-expl">
+      <div class="paso-expl"><span class="n">1</span><div>Pagás una <b>cuota todos los meses</b>,
+        viajes o no.</div></div>
+      <div class="paso-expl"><span class="n">2</span><div>Esa cuota se te va acumulando como
+        <b>crédito</b>.</div></div>
+      <div class="paso-expl"><span class="n">3</span><div>Cuando querés, <b>gastás el crédito</b>
+        en las salidas que elijas.</div></div>
+    </div>
+  </div>
+  <div class="caja tenue">
+    <p class="rotulo">Precios de hoy, para que tengas referencia</p>
+    <p style="font-size:.93rem;margin-top:7px;line-height:1.45">Una salida de fin de semana
+    cuesta entre <b>$280.000 y $500.000</b>. Una travesía de cinco a siete días, entre
+    <b>$850.000 y $1.290.000</b>.</p>
+  </div>
+  <p class="micro">Vas a ver <b>tres planes por pantalla</b>, trece pantallas en total, y en cada
+  una te preguntamos dos cosas. Van a aparecer combinaciones que hoy no existen: respondé como
+  si existieran.</p>
+`, () => bien(), {seccion:"Los planes"});
+
+/* ---- 8. qué mira cada plan + cheap talk ----------------------------- */
+/* La glosa de atributos existe por dos razones y las dos son metodológicas:
+   permite usar etiquetas cortas en la tarjeta (sin eso no entra en un teléfono)
+   y explicar el atributo antes reduce la no atención a atributos, que es el
+   sesgo que se come las estimaciones en experimentos de elección largos. */
+P(() => `
+  <h2>Qué cambia de un plan a otro</h2>
+  <p class="intro">Seis cosas. En las tarjetas aparecen abreviadas.</p>
+  <div class="glosa">
+    ${["cuota"].concat(ordenAtributos()).map(n =>
+      `<div class="glosa-fila">${ico(ETIQ[n].ic,20)}<div><b>${ETIQ[n].t}</b>
+        <span>${ETIQ[n].q}</span></div></div>`).join("")}
+  </div>
+  <p class="micro">Los destinos se suman: cada nivel incluye los anteriores. En las tarjetas
+  aparecen con un «+» por eso.</p>
+`, () => bien(), {seccion:"Los planes"});
+
+/* ---- 8b. la alternativa de hoy y el aviso de sesgo hipotético -------- */
+/* Va en pantalla aparte y no junto a la glosa porque las dos juntas pedían
+   1.130 px: en un teléfono la mitad del aviso quedaba abajo del pliegue, y es
+   justo el texto cuya única función es que la persona lo lea. */
+P(() => `
+  <h2>Dos cosas antes de empezar</h2>
+  <div class="caja tenue">
+    <p class="rotulo">Siempre podés no contratar ninguno</p>
+    <p style="font-size:.9rem;margin-top:7px;line-height:1.42">En ese caso
+    ${S.r.hizo === "Sí" ? "seguís comprando salida por salida, como hoy"
+                        : "seguís pagando cada salida cuando la hagas"}:
+    un fin de semana sale <b>$280.000 al contado</b> o <b>3 cuotas de $103.000</b> sobre un
+    precio de lista de $309.000, sin garantía de que se realice y en grupo de hasta 15
+    personas.</p>
+  </div>
+  <div class="nota">${ico("aviso",19)}<div><b>Algo que pasa siempre en estas encuestas.</b>
+    Cuando a la gente le preguntan qué pagaría por algo que todavía no existe, suele decir que
+    pagaría más de lo que después realmente paga. No es mala intención: en una encuesta la plata
+    no sale del bolsillo. <b>Elegí como si tuvieras que pagarlo de verdad este mes</b>, con la
+    plata que tenés.</div></div>
+`, () => bien(), {seccion:"Los planes", pie: () => pieEstandar("Entendido, empecemos")});
+
+/* ---- 9..21. las trece tareas del experimento ------------------------ */
+for (let t = 0; t < 13; t++) {
+  P(() => pintarTarea(t), () => validarTarea(t),
+    {seccion:"Los planes", pie: () => pieEstandar("Siguiente")});
 }
+
+function tareaDe(i){
+  /* devuelve {perfiles, tipo, ref} — tipo: 'est' | 'fija'
+     Las fijas van en las posiciones 0, 6 y 12 (la última repite la primera fija). */
+  const o = ordenTareas();
+  if (i === 0)  return {perfiles: DISENO.fijas[0], tipo:"fija", ref:"fija-1"};
+  if (i === 6)  return {perfiles: DISENO.fijas[1], tipo:"fija", ref:"fija-2"};
+  if (i === 12) return {perfiles: DISENO.fijas[0], tipo:"fija", ref:"fija-1-repetida"};
+  const mapa = [null,0,1,2,3,4,null,5,6,7,8,9,null];
+  const k = mapa[i];
+  return {perfiles: DISENO.bloques[S.bloque][o.estimacion[k]], tipo:"est",
+          ref:"est-" + o.estimacion[k]};
+}
+function textoNivel(j, nivel){ return ATR[j].niveles[nivel]; }
+
+function pintarTarea(i){
+  const T = tareaDe(i);
+  const pos = posiciones(i, T.perfiles.length);
+  const yaEl = S.elecciones[i] || {};
+  const elegido = yaEl.elegido;
+
+  /* Encabezado de cada columna: letra y cuota. La cuota va acá y no como una fila
+     más porque es el ancla de precio de la tarjeta, y así se presenta en la
+     literatura de elección discreta. */
+  let cab = `<div class="esquina sin-linea"></div>`;
+  let filas = "";
+  let pies = `<div class="esquina"></div>`;
+
+  pos.forEach((pIdx, vis) => {
+    const p = T.perfiles[pIdx];
+    const on = elegido === pIdx ? " on" : "";
+    cab += `<div class="cab-plan${on}" data-c="${vis}" onclick="elegirPlan(${i},${pIdx})">
+      <div class="letra">${"ABC"[vis]}</div>
+      <div class="precio">${textoNivel(0,p[0])}</div></div>`;
+    pies += `<div class="pie-cmp" data-c="${vis}">
+      <label class="elegir${on}">
+        <input type="radio" name="plan-${i}" ${on?"checked":""}
+          onchange="elegirPlan(${i},${pIdx})">
+        ${on ? ico("tilde",15) + "Elegido" : "Elegir " + "ABC"[vis]}
+      </label></div>`;
+  });
+
+  ordenAtributos().forEach(nom => {
+    const j = ATR.findIndex(a => a.nombre === nom);
+    filas += `<div class="banda">${ico(ETIQ[nom].ic,14)}${ETIQ[nom].b}</div>`;
+    pos.forEach((pIdx, vis) => {
+      const p = T.perfiles[pIdx];
+      const c = CORTO[nom][p[j]];
+      const on = elegido === pIdx ? " on" : "";
+      filas += `<div class="celda${on}" data-c="${vis}" onclick="elegirPlan(${i},${pIdx})"
+        title="${esc(textoNivel(j,p[j]))}">
+        <b>${c.v}</b>${c.s?`<span>${c.s}</span>`:""}</div>`;
+    });
+  });
+
+  /* 🔴 El texto cambia según la rama. Decirle "como hacés hoy" a alguien que no hizo
+     ninguna salida en dos años es falso, y la proporción de no compra es justamente el
+     estadístico con el que se prueba la tercera hipótesis: si la frase no aplica, el dato
+     no mide lo que se cree que mide. */
+  const practica = S.r.hizo === "Sí";
+  const compra = yaEl.compraria;
+  /* El recordatorio de no compra tiene que estar en TODAS las pantallas, no una
+     vez: es lo que sostiene la interpretación de la proporción de no compra. Lo
+     que se movió a la glosa previa es la DESCRIPCIÓN de precios de la alternativa
+     de hoy, que es constante y ocupaba 92 px en cada una de las trece pantallas. */
+  const alterna = practica ? "seguís comprando salida por salida, como hoy"
+                           : "seguís pagando cada salida cuando la hagas";
+
+  return `
+  <div class="cab-tarea">
+    <h2>Pantalla ${i+1} de 13</h2>
+    <span class="rotulo">Cuota por mes</span>
+  </div>
+  <p class="micro">¿Cuál preferirías? Elegí uno aunque ninguno te guste.</p>
+
+  <div class="cmp">${cab}${filas}${pies}</div>
+
+  <div class="dual">
+    <span class="preg">${elegido === undefined
+      ? "Elegí un plan y después contestá acá."
+      : `¿Contratarías el plan ${"ABC"[pos.indexOf(elegido)]}?`}</span>
+    <div class="fichas">
+      <label class="ficha${compra==="plan"?" on":""}${elegido===undefined?" off":""}">
+        <input type="radio" name="compra-${i}" ${compra==="plan"?"checked":""}
+          ${elegido===undefined?"disabled":""} onchange="setEl(${i},'compraria','plan')">
+        Sí, lo contrato</label>
+      <label class="ficha${compra==="ninguno"?" on":""}${elegido===undefined?" off":""}">
+        <input type="radio" name="compra-${i}" ${compra==="ninguno"?"checked":""}
+          ${elegido===undefined?"disabled":""} onchange="setEl(${i},'compraria','ninguno')">
+        No, sigo como hoy</label>
+    </div>
+    <p class="micro">Si te parecen caros, no contratar ninguno es una respuesta
+    válida: ${alterna}.</p>
+  </div>`;
+}
+
+window.elegirPlan = (i, pIdx) => {
+  S.elecciones[i] = Object.assign({}, S.elecciones[i], {elegido: pIdx, ts: Date.now()});
+  guardar(); pintar();
+};
+window.setEl = (i, campo, val) => {
+  S.elecciones[i] = Object.assign({}, S.elecciones[i], {[campo]: val});
+  guardar(); pintar();
+};
+
+function validarTarea(i){
+  const e = S.elecciones[i] || {};
+  if (e.elegido === undefined) return fallo("Elegí uno de los tres planes.");
+  if (e.compraria === undefined) return fallo("Falta la segunda: ¿lo contratarías o no?");
+  const T = tareaDe(i);
+  S.elecciones[i].ref = T.ref;
+  S.elecciones[i].tipo = T.tipo;
+  S.elecciones[i].perfiles = T.perfiles;
+  guardar();
+  return bien();
+}
+
+/* ---- 22. certeza ---------------------------------------------------- */
+P(() => `
+  <h2>Una última cosa sobre lo que elegiste</h2>
+  <p class="intro">No hay respuesta correcta. Sirve para saber cuánto peso darle a cada
+  respuesta.</p>
+  ${escala("certeza","¿Qué tan seguro estás de las elecciones que hiciste?",
+     "1 = nada seguro", "10 = del todo seguro")}
+`, () => req("certeza","Elegí un número del 1 al 10."), {seccion:"Los planes"});
+
+/* ---- 23. compromiso anual ------------------------------------------ */
+P(() => {
+  const op = (v, precio, cond) => `
+    <label class="grande${S.r.compromiso===v?" on":""}">
+      <input type="radio" name="compromiso" ${S.r.compromiso===v?"checked":""}
+        onchange="setR('compromiso','${v}')">
+      <b style="font-size:1.25rem">${precio}</b><em>${cond}</em></label>`;
+  return `
+  <h2>Dos formas de pagar lo mismo</h2>
+  <p class="intro">Los dos planes son iguales en todo: mismas salidas, mismos destinos, mismas
+  condiciones. Lo único que cambia es el compromiso.</p>
+  <div class="dos">
+    ${op("$70.000 por mes, me puedo dar de baja cuando quiera","$70.000 por mes","Me doy de baja cuando quiera")}
+    ${op("$59.000 por mes, pero me comprometo por doce meses","$59.000 por mes","Me comprometo por doce meses")}
+  </div>
+  <div class="lista">
+    <label class="op${S.r.compromiso==="Ninguno de los dos"?" on":""}">
+      <input type="radio" name="compromiso" ${S.r.compromiso==="Ninguno de los dos"?"checked":""}
+        onchange="setR('compromiso','Ninguno de los dos')">
+      <span class="marca"><i></i></span><span>Ninguno de los dos</span></label>
+  </div>`;
+}, () => req("compromiso","Falta elegir una de las tres."), {seccion:"Las reglas"});
+
+/* ---- 24. mecanismo de acceso --------------------------------------- */
+P(() => `
+  <h2>Cómo debería funcionar</h2>
+  ${radio("mecanismo","Si querés viajar <b>antes</b> de haber juntado crédito suficiente, ¿qué te parece más justo?",
+    [{v:"Esperar hasta juntar el crédito", l:"Esperar hasta juntar el crédito"},
+     {v:"Viajar antes y pagar la diferencia de mi bolsillo",
+      l:"Viajar antes", s:"y pagar la diferencia de mi bolsillo"},
+     {v:"Que me adelanten el crédito a cambio de un compromiso de permanencia",
+      l:"Que me adelanten el crédito", s:"a cambio de quedarme un tiempo"},
+     {v:"Pagar un monto al inscribirme que me habilite desde el primer mes",
+      l:"Pagar algo al inscribirme", s:"y usarlo desde el primer mes"},
+     {v:"Ninguna me convence", l:"Ninguna me convence"}])}
+  ${num("meses_espera_n","Si el crédito se junta mes a mes, ¿cuántos meses estarías dispuesto a pagar antes de tu primera salida? Poné 0 si querrías usarlo desde el primer mes.",0,24)}
+`, () => req("mecanismo","Falta la primera pregunta."), {seccion:"Las reglas"});
+
+/* ---- 25. el mes en que no viajás ----------------------------------- */
+P(() => `
+  <h2>Los meses que no viajás</h2>
+  <p class="intro">Una suscripción se paga todos los meses, y la mayoría de esos meses no se
+  viaja. Eso es lo que decide si alguien se queda o se da de baja.</p>
+  ${check("sin_viaje","¿Qué <b>dos cosas</b> te importarían más? Elegí hasta dos.",
+    [{v:"Que el crédito se acumule y no se pierda nunca", l:"Que el crédito no se pierda nunca"},
+     {v:"Que se acumule, aunque tenga un vencimiento", l:"Que se acumule, con vencimiento"},
+     {v:"Descuentos o beneficios en equipo y cursos", l:"Descuentos en equipo y cursos"},
+     {v:"Poder pausar la cuota algunos meses al año", l:"Poder pausar la cuota"},
+     {v:"Nada en particular: entiendo que pago por tener el lugar asegurado", l:"Nada: pago por tener el lugar"}],
+    "fichas")}
+`, () => (S.r.sin_viaje || []).length > 0 ? bien() : fallo("Elegí una o dos."),
+  {seccion:"Las reglas"});
+
+/* ---- 26. la cuota y la inflación ----------------------------------- */
+P(() => `
+  <h2>La cuota y la inflación</h2>
+  ${radio("actualizacion","¿Cómo te parece que debería actualizarse la cuota?",
+    [{v:"Precio fijo en pesos por doce meses, aunque después suba de golpe",
+      l:"Precio fijo en pesos por doce meses", s:"aunque después suba de golpe"},
+     {v:"Ajuste automático cada tres meses por un índice público",
+      l:"Ajuste cada tres meses", s:"por un índice público"},
+     {v:"Ajuste cuando el operador avise, con derecho a darme de baja",
+      l:"Ajuste cuando el operador avise", s:"con derecho a darme de baja"},
+     {v:"Cuota en dólares", l:"Cuota en dólares"}])}
+`, () => req("actualizacion","Falta cómo debería actualizarse la cuota."), {seccion:"Las reglas"});
+
+/* ---- 27. perfil: dónde y cuántos años ------------------------------ */
+/* El perfil va al final a propósito: preguntarlo al principio sube el abandono y
+   contamina las respuestas con la identidad que la persona acaba de declarar.
+   Y va repartido en cuatro pantallas cortas en lugar de tres largas: medido,
+   tres pantallas con tres preguntas de muchas opciones se pasaban del alto de un
+   teléfono por entre 47 y 77 px cada una. */
+P(() => `
+  <h2>Para cerrar: sobre vos</h2>
+  <p class="intro">Sirven para comparar la muestra con las estadísticas oficiales de turismo.
+  Ninguna te identifica.</p>
+  ${radio("region","¿Dónde vivís?",
+    [{v:"Ciudad de Buenos Aires", l:"CABA"},
+     {v:"Provincia de Buenos Aires, Gran Buenos Aires", l:"Gran Buenos Aires"},
+     {v:"Provincia de Buenos Aires, resto", l:"Buenos Aires, interior"},
+     "Córdoba","Santa Fe","Mendoza",
+     {v:"Neuquén o Río Negro", l:"Neuquén o Río Negro"},
+     "Resto del país","Fuera de la Argentina"], "fichas")}
+  ${radio("edad","¿Qué edad tenés?",
+    ["Menos de 25","25 a 34","35 a 44","45 a 54","55 a 64","65 o más"], "fichas")}
+`, () => {
+  if (S.r.region === undefined) return fallo("Falta dónde vivís.");
+  if (S.r.edad === undefined) return fallo("Falta tu edad.");
+  return bien();
+}, {seccion:"Sobre vos"});
+
+/* ---- 28. perfil: género, estudios y casa --------------------------- */
+P(() => `
+  <h2>Sobre vos</h2>
+  ${radio("genero","¿Con qué género te identificás?",
+    ["Mujer","Varón","Otro",{v:"Prefiero no contestar", l:"Prefiero no decir"}], "fichas")}
+  ${radio("educacion","¿Cuál es el nivel de estudios más alto que completaste?",
+    ["Secundario o menos","Terciario o técnico","Universitario","Posgrado",
+     {v:"Prefiero no contestar", l:"Prefiero no decir"}], "fichas")}
+  ${num("personas_hogar","¿Cuántas personas viven en tu casa, contándote a vos y a los chicos?",1,15)}
+`, () => S.r.personas_hogar !== undefined ? bien()
+      : fallo("Falta cuántas personas viven en tu casa."),
+  {seccion:"Sobre vos"});
+
+/* ---- 29. perfil: el ingreso del hogar ------------------------------ */
+/* Sola en su pantalla: son ocho tramos y es la pregunta que más se saltea, así
+   que conviene que se vea entera y sin nada más compitiendo al lado. */
+P(() => `
+  <h2>El ingreso de tu casa</h2>
+  <p class="intro">Esta la podés saltear y la respuesta sigue sirviendo. Sirve para comparar la
+  muestra con las estadísticas oficiales.</p>
+  ${radio("ingreso_hogar","Sumando todo lo que entra por mes, de todas las personas que aportan y después de descuentos, ¿en qué tramo cae?",
+    [{v:"Hasta $800.000", l:"Hasta $800 mil"},
+     {v:"Más de $800.000 y hasta $1.500.000", l:"$800 mil a $1,5 M"},
+     {v:"Más de $1.500.000 y hasta $2.500.000", l:"$1,5 a $2,5 M"},
+     {v:"Más de $2.500.000 y hasta $4.000.000", l:"$2,5 a $4 M"},
+     {v:"Más de $4.000.000 y hasta $6.000.000", l:"$4 a $6 M"},
+     {v:"Más de $6.000.000 y hasta $9.000.000", l:"$6 a $9 M"},
+     {v:"Más de $9.000.000", l:"Más de $9 M"},
+     {v:"Prefiero no contestar", l:"Prefiero no decir"}], "fichas")}
+  <p class="micro">Cada tramo incluye su número más alto. Si te queda justo en el límite, elegí
+  el de abajo.</p>
+`, () => bien(), {seccion:"Sobre vos"});
+
+/* ---- 30. perfil: cómo llegan a fin de mes, cuotas, y envío --------- */
+P(() => `
+  <h2>Lo último</h2>
+  ${radio("fin_de_mes","Pensando en todo lo que entra en tu casa, ¿cómo llegan a fin de mes?",
+    [{v:"No alcanza y hay que pedir prestado", l:"No alcanza, hay que pedir prestado"},
+     {v:"Justo, sin margen para ahorrar", l:"Justo, sin margen para ahorrar"},
+     {v:"Alcanza y queda algo", l:"Alcanza y queda algo"},
+     {v:"Alcanza bien y se puede ahorrar o invertir", l:"Alcanza bien, se puede ahorrar"},
+     {v:"Prefiero no contestar", l:"Prefiero no decir"}], "fichas")}
+  ${radio("cuota_otra","¿Pagás hoy alguna cuota mensual por deporte u ocio? Gimnasio, club, coach, alguna app.",
+    [{v:"Sí, una", l:"Sí, una"},{v:"Sí, dos o más", l:"Sí, dos o más"},"No",
+     {v:"No ahora, pero pagué antes", l:"Antes sí, ahora no"}], "fichas")}
+  ${S.canal === "sin_etiqueta" ? radio("como_llego","¿Por dónde llegaste a esta encuesta?",
+    [{v:"Un aviso en Instagram o Facebook", l:"Un aviso en Instagram o Facebook"},
+     {v:"Me la mandó alguien que conozco", l:"Me la mandó un conocido"},
+     {v:"Un grupo o comunidad de montaña", l:"Un grupo de montaña"},
+     "Otro lugar"], "fichas") : ""}
+`, () => req("cuota_otra","Falta si pagás hoy alguna cuota mensual."),
+  {seccion:"Sobre vos", pie: () => pieEstandar("Enviar respuestas","enviar()")});
+
+/* ================================================================ navegación */
+function pasosVisibles(){ return PASOS.map((p,i) => ({p,i})).filter(x => x.p.visible()); }
+
 window.siguiente = () => {
   const act = PASOS[S.paso];
   if (act.valida && !act.valida()) return;
   let n = S.paso + 1;
-  while (n < PASOS.length && PASOS[n].render() === null) n++;
+  while (n < PASOS.length && !PASOS[n].visible()) n++;
   if (n >= PASOS.length) return;
   S.paso = n; guardar(); pintar(); window.scrollTo(0,0);
   /* Se guarda en el servidor después de avanzar, sin await: la persona no espera
@@ -797,25 +1334,31 @@ window.siguiente = () => {
 };
 window.anterior = () => {
   let n = S.paso - 1;
-  while (n > 0 && PASOS[n].render() === null) n--;
+  while (n > 0 && !PASOS[n].visible()) n--;
   S.paso = Math.max(0, n); guardar(); pintar(); window.scrollTo(0,0);
 };
 
 function pintar(){
-  const html = PASOS[S.paso].render();
-  app.innerHTML = html === null ? "" : html;
+  const paso = PASOS[S.paso];
+  app.innerHTML = paso.render();
+  const pie = document.getElementById("pie-in");
+  const cajaPie = document.getElementById("pie");
+  pie.innerHTML = paso.pie ? paso.pie() : pieEstandar("Seguir", null, S.paso === 0);
+  cajaPie.hidden = false;
+
   const vis = pasosVisibles();
   const pos = vis.findIndex(x => x.i === S.paso);
-  const prog = document.getElementById("progreso");
+  const top = document.getElementById("top");
   if (S.paso > 0 && pos >= 0) {
-    prog.hidden = false;
-    document.getElementById("barra").style.width = Math.round(100*(pos)/(vis.length-1)) + "%";
-    document.getElementById("paso-txt").textContent =
-      "Paso " + (pos+1) + " de " + vis.length;
-  } else { prog.hidden = true; }
+    top.hidden = false;
+    document.getElementById("barra").style.width =
+      Math.round(100*pos/(vis.length-1)) + "%";
+    document.getElementById("seccion").textContent = paso.seccion || "";
+    document.getElementById("paso-txt").textContent = (pos+1) + " de " + vis.length;
+  } else { top.hidden = true; }
 }
 
-/* ---------------------------------------------------- envío */
+/* ==================================================================== envío */
 window.enviar = async () => {
   const act = PASOS[S.paso];
   if (act.valida && !act.valida()) return;
@@ -825,7 +1368,8 @@ window.enviar = async () => {
   guardar();
 
   const payload = JSON.stringify(S);
-  app.innerHTML = `<h2>Enviando…</h2><p class="chico">Un segundo.</p>`;
+  app.innerHTML = `<h2>Enviando…</h2><p class="intro">Un segundo.</p>`;
+  document.getElementById("pie").hidden = true;
 
   /* Dos intentos con una espera en el medio: la mayoría de los fallos de red son
      momentáneos, y acá la respuesta ya está completa y sería una pena perderla. */
@@ -837,31 +1381,40 @@ window.enviar = async () => {
 
   if (ok) {
     try { localStorage.removeItem(LS); } catch(e){}
-    app.innerHTML = `<h1>Listo, gracias</h1>
-      <p>Tu respuesta quedó registrada. Gracias por tomarte el tiempo de responder y llegar
-      hasta el final.</p>`;
+    app.innerHTML = cierreOk();
   } else {
     /* La via de respaldo existe porque una respuesta completa que se pierde por un error de
        red es una respuesta que hay que volver a conseguir. */
-    app.innerHTML = `<h1>Casi listo</h1>
-      <div class="aviso"><b>Terminaste, pero no pude confirmar el último envío.</b> Lo más
-      probable es que haya quedado guardado igual, porque la encuesta va guardando a medida que
-      avanzás. Si querés asegurarte, probá el botón de reintentar.</div>
-      <div class="botones">
-        <button onclick="reintentar()">Reintentar el envío</button>
-        <button class="sec" onclick="verVolcado()">Copiar la respuesta a mano</button>
+    app.innerHTML = `<h2>Casi listo</h2>
+      <div class="nota">${ico("aviso",19)}<div><b>Terminaste, pero no pude confirmar el último
+        envío.</b> Lo más probable es que haya quedado guardado igual, porque la encuesta va
+        guardando a medida que avanzás. Si querés asegurarte, probá reintentar.</div></div>
+      <div class="acciones">
+        <button type="button" class="pri" onclick="reintentar()">Reintentar el envío</button>
+        <button type="button" class="sec" onclick="verVolcado()">Copiar a mano</button>
       </div>
-      <div id="respaldo" hidden>
-        <p class="chico">Copiá este texto y mandámelo por donde me escribiste.</p>
-        <button onclick="copiar()">Copiar el texto</button>
-        <code class="codigo" id="volcado">${esc(payload)}</code>
+      <div id="respaldo" hidden class="bloque">
+        <p class="micro">Copiá este texto y mandámelo por donde me escribiste.</p>
+        <button type="button" class="sec" onclick="copiar()">Copiar el texto</button>
+        <code class="volcado" id="volcado">${esc(payload)}</code>
       </div>`;
   }
-  document.getElementById("progreso").hidden = true;
+  document.getElementById("top").hidden = true;
 };
+
+/* El cierre no menciona la tesis: a esta altura la persona ya leyó para qué es
+   tres veces. Agradecer y nada más. */
+function cierreOk(){
+  return `<div class="cierre">
+    <div class="tilde">${ico("tilde",24)}</div>
+    <h1>Listo</h1>
+    <p class="intro">Gracias por tomarte el tiempo de responder y llegar hasta el final.</p>
+  </div>`;
+}
+
 /* Dos personas que responden en el mismo teléfono (una charla, una reunión) compartirían
-   el estado guardado: la segunda seguiría la encuesta de la primera. Esto le da salida. */
-/* Se pregunta antes de borrar: un toque accidental en «¿No sos vos?» a mitad del
+   el estado guardado: la segunda seguiría la encuesta de la primera. Esto le da salida.
+   Se pregunta antes de borrar: un toque accidental en «¿No sos vos?» a mitad del
    experimento tiraría abajo doce minutos de respuestas. */
 window.confirmarReinicio = (ev) => {
   if (ev) ev.preventDefault();
@@ -869,15 +1422,9 @@ window.confirmarReinicio = (ev) => {
     empezarDeNuevo();
   }
 };
-
 window.empezarDeNuevo = () => {
   try { localStorage.removeItem(LS); } catch(e){}
-  S = { id: nuevoId(), bloque: Math.floor(Math.random()*DISENO.bloques.length),
-        iniciado: new Date().toISOString(), canal: canalDeUrl(),
-        pantalla: (typeof screen !== "undefined" ? screen.width + "x" + screen.height : "?"),
-        movil: /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent || ""),
-        paso: 0, r: {}, elecciones: [], orden: null, ordenAtr: null,
-        version: CONFIG.version };
+  S = estadoNuevo();
   ultimoPasoEnviado = -1;
   guardar(); pintar(); window.scrollTo(0,0);
 };
@@ -889,12 +1436,13 @@ window.reintentar = async () => {
   const ok = await sincronizar(true);
   if (ok) {
     try { localStorage.removeItem(LS); } catch(e){}
-    app.innerHTML = `<h1>Listo, gracias</h1><p>Ahora sí quedó registrada.</p>`;
+    app.innerHTML = cierreOk();
   } else {
-    app.innerHTML = `<h1>Sigue sin conectar</h1>
-      <div class="aviso">Copiá el texto de abajo y mandámelo, así no se pierde.</div>
-      <button onclick="copiar()">Copiar el texto</button>
-      <code class="codigo" id="volcado">${esc(JSON.stringify(S))}</code>`;
+    app.innerHTML = `<h2>Sigue sin conectar</h2>
+      <div class="nota">${ico("aviso",19)}<div>Copiá el texto de abajo y mandámelo, así no se
+        pierde.</div></div>
+      <button type="button" class="sec" onclick="copiar()">Copiar el texto</button>
+      <code class="volcado" id="volcado">${esc(JSON.stringify(S))}</code>`;
   }
 };
 window.copiar = () => {
