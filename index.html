@@ -819,70 +819,45 @@ function pieEstandar(txt, accion, sinVolver){
     </div>`;
 }
 
-/* ---- 0. portada y consentimiento ------------------------------------- */
-/* El consentimiento es largo porque tiene que serlo. Para que la portada entre
-   en una pantalla, lo material queda a la vista y el detalle queda en bloques
-   que se abren: la información sigue estando completa y se lee más que un muro
-   de texto que nadie abre. */
+/* ---- 0. portada ------------------------------------------------------ */
+/* Corta a propósito. La encuesta no pide nombre, teléfono ni correo y no guarda
+   IP, así que no hay dato personal que proteger y el aparato de derechos de
+   acceso y rectificación no tenía a qué aplicarse. Queda lo que hace algo: para
+   qué es, cuánto dura, que no se pide nada que identifique, y que quien escribe
+   es socio de una empresa de montaña. Esa última no está por obligación legal:
+   está porque sin ella, lo que diga sobre precio alguien que lo conoce vale
+   menos como evidencia. */
 P(() => `
   <h1>Cómo la gente organiza sus salidas de montaña</h1>
   <p class="intro">Tesis de la Maestría en Management + Analytics, Universidad Torcuato Di Tella.
-  Responder lleva unos diez minutos y se guarda a medida que avanzás.</p>
+  Diez minutos. Se guarda a medida que avanzás, así que podés cerrar y volver.</p>
 
   <div class="caja">
     <div class="bloque">
-      <p style="font-size:.90rem;line-height:1.42"><b>Para qué es.</b> Estudio cómo se decide y
+      <p style="font-size:.95rem;line-height:1.45"><b>Qué estoy estudiando.</b> Cómo se decide y
       se organiza una salida de montaña guiada en la Argentina, y qué valora la gente cuando la
-      contrata. Es un trabajo académico y no se usa para venderte nada.</p>
-      <p style="font-size:.90rem;line-height:1.42"><b>Algo que corresponde que sepas.</b> Además
-      de estudiar, soy socio de una empresa que organiza salidas de montaña. Las respuestas no se
-      usan con fines comerciales y no te voy a contactar para ofrecerte nada.</p>
-      <p style="font-size:.90rem;line-height:1.42"><b>No se pide tu nombre, tu teléfono ni tu
-      correo</b>, y tampoco se guarda tu dirección de IP. Participar es voluntario y podés cerrar
-      la pestaña cuando quieras.</p>
+      contrata. Es un trabajo de la facultad: no te voy a vender ni ofrecer nada.</p>
+      <p style="font-size:.95rem;line-height:1.45"><b>No se pide tu nombre, tu teléfono ni tu
+      correo.</b> Las respuestas se analizan todas juntas y en la tesis van solo los resultados
+      del conjunto.</p>
+      <p style="font-size:.95rem;line-height:1.45"><b>Para que lo sepas:</b> además de estudiar,
+      soy socio de una empresa que organiza salidas de montaña.</p>
     </div>
   </div>
-
-  <details class="mas"><summary>Qué se guarda, dónde, y qué pasa si abandonás</summary><div>
-    <p>Tus respuestas y nada más. Se analizan todas juntas, nunca de a una, y los resultados se
-    publican solo de forma agregada. Se guardan en el servidor de un proveedor externo, que puede
-    estar fuera de la Argentina, y se borran cuando la tesis se apruebe.</p>
-    <p>Lo que vayas contestando se guarda a medida que avanzás, también si cerrás la pestaña antes
-    del final. Esas respuestas a medio terminar se usan nada más que para saber en qué momento la
-    gente deja la encuesta. Si te arrepentís, avisame antes de llegar al final y la descarto.</p>
-  </div></details>
-  <details class="mas"><summary>Qué es obligatorio contestar</summary><div>
-    <p>Si seguís, casi todas las preguntas hay que contestarlas, porque si falta una la respuesta
-    no entra en el análisis. Las de estudios e ingreso las podés saltear y la respuesta sigue
-    sirviendo.</p>
-    <p>La respuesta no lleva nada que te identifique, así que una vez enviada no puedo encontrarla
-    para mostrártela, corregirla ni borrarla. Por eso, si querés retirarla, tiene que ser antes
-    de enviar.</p>
-  </div></details>
-  <details class="mas"><summary>Quién es responsable</summary><div>
-    <p>Martín Laborda, alumno de la Maestría en Management + Analytics de la Universidad Torcuato
-    Di Tella, legajo 24T3180, domicilio en [COMPLETAR]. Escribime a [COMPLETAR CORREO] por
-    cualquier consulta o para pedirme los resultados cuando el trabajo esté terminado. Mi director
-    de tesis es [COMPLETAR NOMBRE], [COMPLETAR CORREO].</p>
-  </div></details>
 
   ${hayAvance() ? `<p class="micro">Hay una encuesta a medio responder en este dispositivo.
     Si la empezó otra persona, usá «empezar de nuevo».</p>` : ""}
 `, () => document.getElementById("cons").checked
       ? bien()
       : fallo("Hace falta aceptar para seguir."),
-  /* 🔴 La casilla de consentimiento va en la barra de acción y no al final del
-     texto. Es la única pantalla que no entra completa (el consentimiento tiene
-     que decir todo lo que dice), así que con la casilla abajo del pliegue la
-     persona veía el botón «Empezar» sin ver qué estaba aceptando: apretaba,
-     recibía un error y recién ahí se enteraba. Con la casilla pegada al botón,
-     lo que se acepta y el acto de aceptar están siempre juntos. */
+  /* La casilla va en la barra de acción y no al final del texto: así lo que se
+     acepta y el acto de aceptar están siempre juntos en la pantalla. */
   {pie: () => `
     <label class="op${S.r.consentimiento?" on":""}" style="margin:0">
       <input type="checkbox" id="cons" ${S.r.consentimiento?"checked":""}
         onchange="marcarCons(this.checked)">
       <span class="marca"><i></i></span>
-      <span>Leí lo de arriba, tengo 18 años o más y acepto participar.</span>
+      <span>Tengo 18 años o más y quiero participar.</span>
     </label>
     <div class="aviso-err" id="aviso-pie" hidden></div>
     <div class="acciones">
