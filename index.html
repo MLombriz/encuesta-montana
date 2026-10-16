@@ -1304,35 +1304,6 @@ P(() => `
 
 `, () => req("fin_de_mes","Falta cómo llegan a fin de mes."), {seccion:"Sobre vos"});
 
-/* ---- 30a. el mercado visto desde el cliente ------------------------ */
-/* 🔴 Va DESPUÉS del experimento y nunca antes: nombrar operadores antes de las
-   tarjetas prepara la cabeza y contamina la estimación entera.
-   La lista son los diez con más productos del relevamiento propio, en orden
-   alfabético y con INTERRA como una más. Preguntar solo por INTERRA delataría
-   quién paga la encuesta y tiraría abajo la defensa de la que depende todo el
-   trabajo, que es que el instrumento no está hecho para una empresa. */
-const OPERADORES = ["Acampar Trek","Alondra Expediciones","Alto Rumbo","ANTIS Outdoor",
-  "Argentinian Explorer","Huka","INTERRA","MONS","Siqay Adventure","Tierra Libre Expediciones"];
-
-P(() => `
-  <h2>Quién hay en el mercado</h2>
-  <p class="intro">No importa si conocés pocos o ninguno: saber cuántos se conocen es parte de
-  lo que estoy midiendo.</p>
-  ${check("conoce_op","¿De cuáles escuchaste hablar?",
-    OPERADORES.concat([{v:"Ninguno de estos", l:"Ninguno de estos"}]), "fichas")}
-  ${/* La segunda lista muestra SOLO los que la persona dijo conocer. No es para
-       ahorrar espacio, aunque lo ahorra: no se puede haber contratado con un
-       operador del que nunca se escuchó hablar, y ofrecer los once nombres otra
-       vez invita a marcar de más. Con tres o cuatro fichas la pregunta se
-       contesta de un vistazo. */""}
-  ${(S.r.hizo === "Sí" && (S.r.conoce_op||[]).filter(x => x !== "Ninguno de estos").length)
-    ? check("contrato_op","Y de esos, ¿con cuál o cuáles contrataste alguna vez?",
-        (S.r.conoce_op||[]).filter(x => x !== "Ninguno de estos")
-          .concat([{v:"Con ninguno de ellos", l:"Con ninguno"}]), "fichas") : ""}
-`, () => (S.r.conoce_op || []).length > 0 ? bien()
-      : fallo("Marcá los que conozcas, o «ninguno de estos»."),
-  {seccion:"Sobre vos"});
-
 /* ---- 30b. dónde busca y con quién va ------------------------------- */
 P(() => `
   <h2>Cómo organizás una salida</h2>
