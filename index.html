@@ -812,7 +812,14 @@ window.setNum = (c,v,min,max) => {
   const cruzaCero = (S.r[c] > 0) !== (n > 0);
   S.r[c] = n;
   guardar();
-  if (c === "contrato_2a" && cruzaCero) { pintar(); return; }
+  if (c === "contrato_2a" && cruzaCero) {
+    pintar();
+    /* El repintado destruye el campo: hay que devolverle el foco con el cursor al final, o
+       quien tipea "12" se queda con "1". */
+    const el = document.getElementById("f-" + c);
+    if (el) { el.focus(); const v = el.value; el.value = ""; el.value = v; }
+    return;
+  }
   /* Las canceladas pasaron de número a tramo, así que el recorte automático que
      había acá ya no aplica: la inconsistencia se chequea al validar la pantalla. */
   /* Repintar solo cuando el valor guardado difiere de lo tecleado (un recorte por tope),
