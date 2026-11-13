@@ -806,8 +806,13 @@ window.setNum = (c,v,min,max) => {
   if (!Number.isFinite(n)) return;
   n = Math.max(min, Math.min(max, n));
   const cambio = S.r[c] !== n;
+  /* Si la pantalla muestra u oculta preguntas según este número (contratadas > 0), hay que
+     redibujarla cuando cruza el cero: si no, la persona toca Seguir y recibe un error por
+     preguntas que todavía no ve. Solo en ese cruce, para no mover el cursor en cada tecla. */
+  const cruzaCero = (S.r[c] > 0) !== (n > 0);
   S.r[c] = n;
   guardar();
+  if (c === "contrato_2a" && cruzaCero) { pintar(); return; }
   /* Las canceladas pasaron de número a tramo, así que el recorte automático que
      había acá ya no aplica: la inconsistencia se chequea al validar la pantalla. */
   /* Repintar solo cuando el valor guardado difiere de lo tecleado (un recorte por tope),
