@@ -935,7 +935,7 @@ P(() => `
 
 /* ---- 2. rama de quien NO hizo ---------------------------------------- */
 P(() => `
-  <h2>Dos preguntas cortas</h2>
+  <h2>Unas preguntas cortas</h2>
   ${radio("quiso","¿Alguna vez quisiste hacer una salida de montaña y no la hiciste?",
      ["Sí, varias veces","Sí, alguna vez","No, nunca me lo planteé"], "fichas")}
   ${(S.r.quiso && S.r.quiso !== "No, nunca me lo planteé") ? `${check("impidio","¿Qué te lo impidió? Podés marcar varias.",
@@ -1034,7 +1034,7 @@ P(() => `
       `<div class="glosa-fila">${ico(ETIQ[n].ic,20)}<div><b>${ETIQ[n].t}</b>
         <span>${ETIQ[n].q}</span></div></div>`).join("")}
   </div>
-  <p class="micro">Cada opción de destinos suma a la anterior; por eso el «+».</p>
+  <p class="micro">Por eso, en destinos, el «+».</p>
 `, () => bien(), {visible: () => !fuera(), seccion:"Los planes"});
 
 /* ---- 8b. la alternativa de hoy y el aviso de sesgo hipotético -------- */
@@ -1042,7 +1042,7 @@ P(() => `
    1.130 px: en un teléfono la mitad del aviso quedaba abajo del pliegue, y es
    justo el texto cuya única función es que la persona lo lea. */
 P(() => `
-  <h2>Dos cosas antes de empezar</h2>
+  <h2>Antes de empezar</h2>
   <div class="caja tenue">
     <p class="rotulo">Siempre podés no contratar ninguno</p>
     <p style="font-size:.9rem;margin-top:7px;line-height:1.42">En ese caso
@@ -1053,7 +1053,7 @@ P(() => `
     si no se junta gente se cancela.</p>
   </div>
   <div class="nota">${ico("aviso",19)}<div>Elegí pensando en decisiones reales, como si la
-    cuota la fueras a pagar. Los planes parecen parecidos, pero tienen sus diferencias.</div></div>
+    cuota la fueras a pagar. Parecen opciones similares, pero tienen sus diferencias.</div></div>
 `, () => bien(), {visible: () => !fuera(), seccion:"Los planes", pie: () => pieEstandar("Entendido, empecemos")});
 
 /* ---- 9..21. las trece tareas del experimento ------------------------ */
@@ -1288,7 +1288,7 @@ P(() => {
 
 /* ---- 24. mecanismo de acceso --------------------------------------- */
 P(() => `
-  <h2>Viajar antes de cubrirla</h2>
+  <h2>Adelantar una salida</h2>
   ${radio("mecanismo","Si querés hacer una salida <b>antes</b> de haberla cubierto con las cuotas, ¿qué te parece más justo?",
     [{v:"Esperar hasta tener pagada la salida", l:"Esperar hasta tener pagada la salida"},
      {v:"Viajar antes y pagar la diferencia de mi bolsillo",
@@ -1522,20 +1522,16 @@ window.enviar = async () => {
     try { localStorage.removeItem(LS); } catch(e){}
     app.innerHTML = cierreOk();
   } else {
-    /* La via de respaldo existe porque una respuesta completa que se pierde por un error de
-       red es una respuesta que hay que volver a conseguir. */
+    /* Sin vía de "copiar y mandar": obligaba a mandar las respuestas por un canal que
+       identifica a la persona, y quien llegó por un aviso no tiene a quién mandarlas. Lo
+       respondido queda en el dispositivo (el estado solo se borra cuando el envío confirma),
+       así que la salida es reintentar, ahora o más tarde desde el mismo link. */
     app.innerHTML = `<h2>Casi listo</h2>
       <div class="nota">${ico("aviso",19)}<div><b>Terminaste, pero no pude confirmar el último
         envío.</b> Lo más probable es que haya quedado guardado igual, porque la encuesta va
         guardando a medida que avanzás. Si querés asegurarte, probá reintentar.</div></div>
       <div class="acciones">
         <button type="button" class="pri" onclick="reintentar()">Reintentar el envío</button>
-        <button type="button" class="sec" onclick="verVolcado()">Copiar a mano</button>
-      </div>
-      <div id="respaldo" hidden class="bloque">
-        <p class="micro">Copiá este texto y mandáselo a quien te pasó el link. Se guarda sin tu nombre.</p>
-        <button type="button" class="sec" onclick="copiar()">Copiar el texto</button>
-        <code class="volcado" id="volcado">${esc(payload)}</code>
       </div>`;
   }
   document.getElementById("top").hidden = true;
@@ -1583,7 +1579,6 @@ window.empezarDeNuevo = () => {
   guardar(); pintar(); window.scrollTo(0,0);
 };
 
-window.verVolcado = () => { document.getElementById("respaldo").hidden = false; };
 window.reintentar = async () => {
   app.innerHTML = `<h2>Reintentando…</h2>`;
   ultimoPasoEnviado = -1;
@@ -1593,18 +1588,12 @@ window.reintentar = async () => {
     app.innerHTML = cierreOk();
   } else {
     app.innerHTML = `<h2>Sigue sin conectar</h2>
-      <div class="nota">${ico("aviso",19)}<div>Copiá el texto de abajo y mandáselo a quien te pasó el link, así no se
-        pierde. Se guarda sin tu nombre.</div></div>
-      <button type="button" class="sec" onclick="copiar()">Copiar el texto</button>
-      <code class="volcado" id="volcado">${esc(JSON.stringify(S))}</code>`;
+      <div class="nota">${ico("aviso",19)}<div>Lo que respondiste queda guardado en este dispositivo.
+        Volvé a abrir el mismo link más tarde y tocá «Reintentar el envío».</div></div>
+      <div class="acciones">
+        <button type="button" class="pri" onclick="reintentar()">Reintentar el envío</button>
+      </div>`;
   }
-};
-window.copiar = () => {
-  const t = document.getElementById("volcado").textContent;
-  navigator.clipboard?.writeText(t).then(
-    () => alert("Copiado. Mandáselo a quien te pasó el link, gracias."),
-    () => alert("No pude copiar. Seleccioná el texto a mano, por favor.")
-  );
 };
 
 pintar();
