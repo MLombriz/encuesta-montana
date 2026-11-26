@@ -574,12 +574,34 @@ function cargar(){
   try {
     const x = localStorage.getItem(LS);
     const e = x ? JSON.parse(x) : null;
-    /* Un estado guardado por otra versión de la página apunta a pantallas que ya no están en el
-       mismo lugar (la del 26/11 insertó una): se descarta y la persona empieza de nuevo. */
-    if (e && e.version !== CONFIG.version) { localStorage.removeItem(LS); return null; }
+    if (e && e.version !== CONFIG.version) return migrarEstado(e);
     return e;
   }
   catch(e){ return null; }
+}
+
+/* Un estado guardado por otra versión de la página apunta a pantallas que pueden no estar en el
+   mismo lugar. Quien dejó la encuesta a medias no tiene que perder lo que hizo (pedido de Martín,
+   26/11), así que se migra lo que se puede y solo se descarta lo que no se sabe migrar. */
+function migraciones(){ return {
+  /* 26/11: se insertó "Cómo son tus salidas" en el índice 4; todo paso de ahí en adelante se corre
+     uno. El filtro pasó de "últimos dos años" a "alguna vez": el migrado no tiene `ultima_vez` y
+     los textos lo tratan como la versión anterior (sin "como hoy" salvo que haya comprado guiadas). */
+  "cp9-2026-11-16": e => {
+    if (e.paso >= 4) e.paso += 1;
+    e.r = e.r || {};
+    e.r.migrado_de = "cp9-2026-11-16";
+    return e;
+  }
+}; }
+/* migraciones() es función y no constante: `let S = cargar()` corre antes de que una const de acá abajo exista. */
+function migrarEstado(e){
+  const m = migraciones()[e.version];
+  if (!m || e.terminado) { try { localStorage.removeItem(LS); } catch(x){} return null; }
+  const n = m(e);
+  n.version = CONFIG.version;
+  try { localStorage.setItem(LS, JSON.stringify(n)); } catch(x){}
+  return n;
 }
 
 /* ------------------------------------------------- guardado en el servidor
@@ -890,11 +912,15 @@ function P(render, valida, extra){
    pantallas en lugar de trece, y se analiza aparte. */
 function fuera(){ return S.r.hizo === "No" && S.r.quiso === "No, nunca me lo planteé"; }
 function nTareas(){ return S.r.hizo === "No" ? 6 : 13; }
-/* Salió en los últimos doce meses (se sabe desde la pantalla 1). */
-function reciente(){ return S.r.hizo === "Sí" && S.r.ultima_vez === "En los últimos doce meses"; }
-/* "Como hoy" solo vale para quien además compró alguna salida guiada en esos doce meses:
-   a quien salió solo por su cuenta no se le puede decir que sigue "comprando como hoy". */
-function compraReciente(){ return reciente() && (S.r.k_guiadas || 0) > 0; }
+/* Dijo que su última salida fue hace más de un año (lo responde en la pantalla 1 desde el 26/11;
+   quien venía de la versión anterior no tiene el dato y no entra acá). */
+function salioHaceMas(){
+  return S.r.hizo === "Sí" && S.r.ultima_vez !== undefined && S.r.ultima_vez !== "En los últimos doce meses";
+}
+/* "Como hoy" solo vale para quien compró alguna salida guiada en los últimos doce meses y no dijo
+   que su última salida fue antes: a quien salió solo por su cuenta no se le puede decir que sigue
+   "comprando como hoy". */
+function compraReciente(){ return S.r.hizo === "Sí" && !salioHaceMas() && (S.r.k_guiadas || 0) > 0; }
 function pieEstandar(txt, accion, sinVolver){
   return `<div class="aviso-err" id="aviso-pie" role="alert" hidden></div>
     <div class="acciones">
@@ -1014,7 +1040,7 @@ P(() => `
 P(() => `
   <h2>Los últimos doce meses</h2>
   <p class="intro">¿Cuántas salidas hiciste en los últimos doce meses? Si no te acordás exacto,
-  poné tu mejor estimación.${reciente() ? "" : " Como tu última salida fue hace más de un año, poné 0 en todas."}</p>
+  poné tu mejor estimación.${salioHaceMas() ? " Como tu última salida fue hace más de un año, poné 0 en todas." : ""}</p>
   ${num("k_dia","Con guía o empresa, de <b>un solo día</b>",0,40)}
   ${num("k_finde","Con guía o empresa, de <b>fin de semana</b> (dos o tres días)",0,40)}
   ${num("k_largas","Con guía o empresa, de <b>cuatro días o más</b>",0,40)}
