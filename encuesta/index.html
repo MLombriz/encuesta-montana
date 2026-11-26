@@ -147,6 +147,10 @@
   .rotulo{font-size:.71rem;text-transform:uppercase;letter-spacing:.07em;font-weight:650;
     color:var(--suave)}
   .preg{font-size:1rem;font-weight:590;line-height:1.35;display:block}
+  .txt-libre{width:100%;box-sizing:border-box;font:inherit;font-size:1rem;line-height:1.4;
+    padding:10px 12px;border:1.5px solid var(--linea, #cfcac0);border-radius:10px;
+    background:var(--fondo2);color:var(--tinta);resize:vertical;min-height:84px}
+  .txt-libre:focus{outline:2px solid var(--tinta);outline-offset:1px}
   .bloque{display:flex;flex-direction:column;gap:8px}
 
   /* --------------------------------------------------------- tarjetas */
@@ -453,7 +457,7 @@ const CONFIG = {
      atada a la cobertura y no se puede analizar junto con las pruebas anteriores. */
   /* 🔴 Tiene que respetar el formato cp<n>-AAAA-MM-DD: la policy de la tabla lo exige y
      rechaza cualquier otro con 401. "plan-2026-11-10" dejó la encuesta sin guardar nada. */
-  version: "cp9-2026-11-16"
+  version: "cp9-2026-11-26"
 };
 
 const DISENO = {"atributos":[{"nombre":"cuota","niveles":["0,6 del precio suelto","0,8 del precio suelto","igual al precio suelto","1,2 del precio suelto"]},{"nombre":"cubre","niveles":["1 salida de fin de semana al año","2 salidas de fin de semana al año","3 salidas de fin de semana al año"]},{"nombre":"garantia","niveles":["si no junta gente se cancela y te devuelven la plata","si no junta gente te reprograman con lugar asegurado","la salida se hace igual, aunque no junte gente"]},{"nombre":"grupo","niveles":["hasta 8 personas","hasta 12 personas","hasta 16 personas"]},{"nombre":"destinos","niveles":["sierras de Córdoba y Buenos Aires","sierras, Norte y Mendoza","sierras, Norte, Mendoza, Patagonia y países vecinos"]},{"nombre":"reserva","niveles":["elegís cualquier fecha","en fines de semana largos el cupo de socios es limitado","solo podés reservar dentro de los 30 días previos"]}],"nAlt":3,"fijas":[[[2,0,2,0,1,2],[1,1,1,1,1,0],[2,0,2,2,1,2]],[[2,0,0,2,1,0],[2,1,2,1,1,2],[3,2,2,1,0,2]]],"bloques":[[[[2,0,2,1,1,2],[0,1,1,2,0,0],[3,2,0,0,2,1]],[[3,1,0,1,0,2],[0,0,2,0,2,1],[1,2,1,2,1,0]],[[1,2,2,1,0,1],[2,0,0,2,2,2],[3,1,1,0,1,0]],[[0,0,0,1,2,1],[2,1,1,0,0,2],[3,2,2,2,1,0]],[[1,2,1,0,0,2],[3,1,2,2,2,1],[0,0,0,1,1,0]],[[0,1,2,2,0,2],[2,2,0,0,2,0],[3,0,1,1,1,1]],[[1,0,1,2,2,2],[2,2,0,1,0,1],[0,1,2,0,1,0]],[[0,2,0,2,1,2],[1,1,2,1,2,0],[3,0,1,0,0,1]],[[2,1,1,2,1,1],[1,0,0,0,0,0],[3,2,2,1,2,2]],[[1,1,0,0,1,1],[2,0,2,2,0,0],[0,2,1,1,2,2]]],[[[0,2,2,1,0,1],[1,0,0,0,2,0],[3,1,1,2,1,2]],[[3,2,2,0,1,0],[2,1,0,1,0,2],[1,0,1,2,2,1]],[[0,2,1,2,0,0],[3,0,2,1,1,2],[2,1,0,0,2,1]],[[2,1,2,0,0,0],[3,2,1,2,2,1],[0,0,0,1,1,2]],[[2,2,1,0,2,2],[3,0,0,1,0,0],[0,1,2,2,1,1]],[[1,1,1,1,0,1],[2,2,0,2,1,0],[0,0,2,0,2,2]],[[1,0,2,2,1,0],[3,2,0,0,0,1],[0,1,1,1,2,2]],[[2,0,1,1,1,1],[0,2,0,2,2,0],[1,1,2,0,0,2]],[[3,1,2,1,2,0],[1,2,0,0,1,1],[2,0,1,2,0,2]],[[3,0,0,2,0,1],[1,2,2,1,2,2],[0,1,1,0,1,0]]],[[[0,1,0,0,2,2],[1,2,1,1,1,1],[3,1,2,2,0,0]],[[3,0,2,2,2,1],[1,1,0,0,1,2],[2,2,1,1,0,0]],[[0,1,2,1,2,1],[2,2,0,2,1,0],[1,0,1,0,0,2]],[[0,2,1,2,2,2],[3,0,0,1,1,0],[2,1,2,0,0,1]],[[2,0,1,0,2,0],[1,1,1,2,1,1],[3,2,2,1,0,2]],[[3,0,1,0,0,1],[2,2,2,2,1,2],[1,1,0,1,2,0]],[[3,2,0,0,2,1],[0,1,1,1,0,0],[1,0,2,2,2,2]],[[3,1,1,2,2,0],[2,0,0,1,1,2],[0,2,2,0,0,1]],[[2,1,1,1,2,1],[1,2,0,2,0,2],[0,0,2,0,1,0]],[[0,0,0,2,0,1],[3,1,1,0,1,2],[1,2,2,0,2,0]]],[[[1,2,1,1,1,0],[2,0,0,2,0,1],[3,1,2,0,2,2]],[[1,1,2,2,0,1],[0,0,1,0,1,2],[3,2,0,1,2,0]],[[1,2,2,0,2,0],[3,1,1,2,1,2],[0,0,0,1,0,1]],[[2,1,0,0,1,0],[3,0,1,1,2,1],[0,2,2,2,0,2]],[[2,1,1,1,2,2],[0,2,0,0,1,1],[3,0,2,2,0,0]],[[3,2,2,1,1,2],[0,1,0,2,2,0],[1,0,1,0,0,1]],[[1,0,0,0,2,2],[0,1,1,1,0,0],[2,2,2,2,1,1]],[[2,0,2,1,1,2],[0,2,1,2,2,1],[3,1,0,0,0,0]],[[2,0,2,0,2,0],[1,2,0,1,0,2],[3,1,1,2,1,1]],[[1,0,0,2,1,0],[0,1,2,1,2,1],[2,2,1,0,0,2]]],[[[1,0,0,1,2,0],[3,1,1,2,0,1],[2,2,2,0,1,2]],[[2,1,2,2,2,2],[0,0,1,1,1,1],[1,2,0,0,0,0]],[[3,2,1,1,0,2],[1,1,2,2,2,0],[2,0,0,0,1,1]],[[0,1,2,1,1,2],[2,0,1,2,0,0],[1,2,0,0,2,1]],[[3,2,2,2,1,1],[2,1,0,1,0,2],[0,0,1,0,2,0]],[[3,0,2,1,2,1],[0,1,0,0,0,0],[1,2,1,2,1,2]],[[3,0,0,0,2,2],[1,1,1,1,1,1],[0,2,2,1,0,0]],[[3,1,0,1,1,0],[2,0,2,2,0,1],[0,2,1,0,2,2]],[[3,1,1,0,1,0],[0,2,0,2,2,1],[1,0,2,1,0,2]],[[2,2,1,1,2,0],[1,1,2,0,0,1],[0,0,0,2,1,2]]],[[[2,1,0,1,2,2],[0,0,1,0,0,1],[3,2,2,2,1,0]],[[3,2,0,1,0,2],[2,0,1,0,1,0],[1,1,2,2,2,1]],[[2,2,2,2,0,1],[1,1,1,0,1,2],[0,0,0,1,2,0]],[[3,0,1,2,0,2],[2,2,0,0,1,1],[0,1,2,1,2,0]],[[3,1,1,2,2,1],[2,0,2,1,1,2],[1,2,0,0,0,0]],[[3,1,0,1,1,1],[0,2,2,0,0,2],[2,0,1,2,2,0]],[[2,1,1,1,0,1],[3,0,2,0,1,0],[0,2,0,2,2,2]],[[0,1,2,2,0,0],[1,0,0,1,1,1],[3,2,1,0,2,2]],[[0,2,1,1,1,1],[1,0,2,2,2,2],[2,1,0,0,0,0]],[[0,1,0,2,1,2],[1,2,1,1,0,0],[3,0,2,0,2,1]]],[[[3,1,2,2,0,0],[2,0,1,1,2,2],[0,2,0,0,1,1]],[[2,1,2,1,1,2],[3,2,1,0,0,1],[0,0,0,2,2,0]],[[2,0,1,2,1,0],[1,0,0,1,0,1],[0,2,2,0,2,2]],[[1,1,0,2,1,1],[2,2,1,0,2,0],[0,0,2,1,0,2]],[[3,2,0,1,1,0],[2,1,2,0,2,1],[1,2,1,2,0,2]],[[0,1,1,0,1,0],[1,0,0,0,2,2],[2,2,2,1,0,1]],[[2,1,0,0,0,2],[1,2,2,1,1,0],[3,0,1,2,2,1]],[[1,2,2,2,2,2],[2,0,0,0,1,1],[0,1,1,1,0,0]],[[1,0,2,0,0,0],[3,1,0,1,2,2],[0,2,1,2,1,1]],[[2,2,0,2,0,0],[3,0,2,0,1,2],[1,1,1,1,2,1]]],[[[3,1,1,1,0,2],[0,2,0,0,1,1],[2,0,2,2,2,0]],[[1,2,1,0,2,2],[3,0,2,1,0,1],[0,1,0,2,1,0]],[[2,2,1,1,2,1],[0,0,0,2,0,2],[1,1,2,0,1,0]],[[0,0,1,0,0,0],[3,2,2,2,1,2],[1,1,0,1,2,1]],[[1,1,0,2,0,1],[0,2,2,1,2,2],[3,0,1,0,1,0]],[[2,0,1,2,1,1],[3,2,0,1,2,0],[0,1,2,0,2,2]],[[2,0,0,1,1,2],[0,1,1,2,2,0],[1,2,2,0,0,1]],[[1,0,1,2,2,2],[0,1,2,1,1,1],[2,2,0,0,0,0]],[[3,2,1,2,1,1],[1,0,2,1,0,0],[2,1,0,0,2,2]],[[2,1,2,2,0,2],[3,0,0,0,2,1],[1,2,1,1,1,0]]],[[[0,1,2,2,0,2],[1,0,0,1,1,1],[2,2,1,0,2,0]],[[2,0,0,2,0,2],[1,2,1,1,2,1],[3,1,2,0,1,0]],[[0,2,0,1,0,0],[2,1,1,2,1,1],[1,0,2,0,2,2]],[[0,2,0,0,1,2],[3,0,2,1,2,1],[1,1,1,2,0,0]],[[2,1,0,0,2,1],[0,0,1,1,0,0],[1,2,2,2,1,2]],[[2,2,2,0,0,1],[0,0,1,2,1,0],[3,1,0,1,2,2]],[[3,2,2,2,2,0],[0,0,0,0,1,1],[2,1,1,1,0,2]],[[0,0,2,2,2,1],[1,1,0,0,0,0],[3,2,1,1,1,2]],[[2,0,2,1,1,0],[3,2,0,2,0,1],[0,1,1,0,2,2]],[[2,2,0,2,2,0],[3,0,1,0,0,2],[0,1,2,1,1,1]]],[[[2,1,1,2,1,2],[0,2,0,0,2,0],[1,0,2,1,0,1]],[[1,1,2,2,2,2],[2,2,0,0,0,1],[3,0,1,1,1,0]],[[0,1,2,0,0,0],[1,2,0,1,1,2],[3,0,1,2,2,1]],[[3,2,2,0,2,2],[0,0,2,1,1,0],[1,1,0,2,0,1]],[[1,0,2,0,2,1],[3,2,0,2,1,0],[0,1,1,1,0,2]],[[2,0,1,0,1,1],[1,2,2,2,0,0],[3,1,0,1,2,2]],[[2,2,1,1,2,0],[3,1,2,2,0,1],[0,0,0,0,1,2]],[[1,1,1,0,2,0],[2,0,0,1,0,2],[0,2,2,2,1,1]],[[3,1,0,0,1,0],[0,2,1,1,2,1],[2,0,2,2,0,2]],[[2,1,2,1,1,1],[0,0,0,2,2,0],[3,2,1,0,0,2]]],[[[0,1,2,1,0,2],[3,0,0,2,2,1],[1,2,1,0,1,0]],[[2,0,1,0,0,2],[3,2,2,1,1,1],[1,1,0,2,2,0]],[[2,0,0,1,1,2],[3,1,1,0,2,1],[0,2,2,2,0,0]],[[3,1,0,0,0,2],[0,0,1,2,1,0],[2,2,2,1,2,1]],[[1,1,0,2,0,1],[3,0,2,0,1,0],[0,2,1,1,2,2]],[[2,1,1,1,2,0],[0,0,2,0,0,1],[1,2,0,2,1,2]],[[1,0,1,1,0,1],[3,2,2,2,2,2],[2,1,0,0,1,0]],[[1,1,2,1,1,2],[0,0,0,1,2,0],[2,2,1,2,0,1]],[[0,2,0,0,2,1],[3,0,1,1,0,0],[2,1,2,2,1,2]],[[1,0,2,0,2,2],[3,2,0,1,0,0],[0,1,1,2,1,1]]],[[[1,2,0,2,0,1],[3,1,2,1,1,1],[2,0,1,0,2,0]],[[2,1,0,2,2,2],[3,0,2,0,0,1],[1,2,1,1,1,0]],[[0,2,2,0,1,2],[1,0,0,1,2,1],[3,1,1,2,0,0]],[[2,1,1,1,1,1],[1,0,2,0,2,2],[3,2,0,2,0,0]],[[3,0,1,2,1,2],[0,1,0,0,2,1],[2,2,2,1,0,0]],[[2,0,0,1,0,2],[0,2,1,2,2,1],[1,1,2,0,1,0]],[[2,2,0,0,1,1],[0,0,0,1,2,0],[1,1,1,2,0,2]],[[0,0,1,1,0,2],[3,2,0,0,1,0],[2,1,2,2,2,1]],[[0,1,1,0,0,0],[1,0,0,2,1,1],[3,2,2,1,2,2]],[[3,2,1,0,2,1],[1,1,0,1,0,2],[0,0,2,2,1,0]]],[[[0,1,1,1,2,2],[3,2,0,0,0,1],[1,0,2,2,1,0]],[[3,1,2,2,2,2],[2,2,1,0,0,0],[0,0,0,1,0,1]],[[2,2,0,0,2,2],[3,0,2,2,0,1],[1,1,1,1,1,0]],[[1,0,1,2,2,1],[3,2,0,1,1,0],[0,1,2,0,0,2]],[[1,2,2,0,2,1],[3,0,1,1,0,2],[2,1,0,2,1,0]],[[2,1,2,1,0,1],[3,2,1,2,1,2],[0,0,0,0,2,0]],[[2,0,2,1,1,1],[1,2,0,2,0,2],[3,1,1,0,2,0]],[[1,2,1,1,2,0],[2,1,0,2,0,1],[0,0,2,0,1,2]],[[0,2,1,2,1,1],[2,0,0,1,2,2],[1,1,2,0,0,0]],[[0,2,2,2,2,0],[1,1,0,0,1,1],[2,0,1,0,0,2]]],[[[1,1,0,1,1,0],[3,0,2,2,2,2],[0,2,1,0,0,1]],[[2,2,0,2,2,2],[3,0,1,1,0,1],[1,0,2,0,1,0]],[[0,1,0,0,0,2],[1,2,1,2,1,1],[3,0,2,1,2,0]],[[1,0,1,1,2,2],[3,2,0,0,1,0],[2,1,2,2,0,1]],[[1,1,2,0,2,1],[0,0,0,2,0,0],[2,2,1,1,1,2]],[[3,1,1,0,1,0],[1,0,0,2,0,2],[0,2,2,1,2,1]],[[3,2,2,0,0,2],[0,0,0,2,1,1],[2,1,1,1,2,0]],[[0,1,1,2,2,0],[1,2,0,1,0,1],[2,0,2,0,1,2]],[[3,1,0,2,1,1],[2,2,2,1,0,0],[0,0,1,0,2,2]],[[2,0,0,0,2,1],[0,1,2,1,1,2],[1,2,1,2,0,0]]],[[[2,1,2,0,1,0],[0,2,1,1,0,2],[1,0,0,2,2,1]],[[3,2,2,2,2,1],[0,1,0,1,0,0],[1,0,1,0,1,2]],[[0,0,0,0,2,2],[2,1,1,2,0,1],[1,2,2,1,1,0]],[[0,0,2,2,1,1],[1,1,0,1,0,2],[3,2,1,0,2,0]],[[0,2,2,2,0,2],[2,0,1,1,2,2],[3,1,0,0,1,1]],[[1,1,1,2,1,2],[2,2,0,0,2,1],[3,0,2,1,0,0]],[[2,0,0,2,0,0],[0,2,1,0,1,1],[3,1,2,2,2,2]],[[1,1,2,1,2,1],[3,2,0,0,0,2],[2,0,1,2,1,0]],[[1,0,2,0,0,1],[0,1,1,2,2,0],[2,2,0,1,1,2]],[[2,1,2,0,0,2],[3,0,1,1,1,1],[1,2,0,2,2,0]]],[[[0,0,0,1,0,0],[1,1,1,2,1,1],[3,2,2,0,2,2]],[[1,0,0,2,1,2],[2,2,2,1,2,0],[3,1,1,0,0,1]],[[2,0,2,1,0,1],[3,2,1,2,2,0],[0,1,0,0,1,2]],[[0,1,2,0,2,0],[2,2,0,2,0,1],[3,0,2,1,1,2]],[[3,1,0,1,1,0],[0,0,2,2,2,1],[2,2,1,0,0,2]],[[2,1,0,0,0,2],[1,0,1,1,2,0],[0,2,2,2,1,1]],[[0,0,1,0,1,2],[2,1,0,2,2,1],[1,2,2,1,0,0]],[[2,1,1,1,2,2],[1,2,2,0,1,1],[3,0,0,2,0,0]],[[0,2,1,1,0,2],[1,0,0,0,2,1],[2,1,2,2,1,0]],[[2,0,1,0,1,0],[3,2,0,1,2,1],[1,1,2,2,0,2]]],[[[1,1,2,2,0,0],[2,0,1,0,1,2],[0,2,0,1,2,1]],[[3,2,2,1,1,1],[2,0,1,2,2,0],[0,1,0,0,0,2]],[[2,2,0,2,1,1],[0,0,2,0,2,0],[1,1,1,1,0,2]],[[0,1,1,1,1,1],[3,2,2,0,2,2],[1,0,0,2,1,0]],[[0,0,2,0,0,1],[2,2,1,1,1,0],[3,1,0,2,2,2]],[[2,0,2,1,0,2],[1,2,0,2,2,1],[3,1,1,0,1,0]],[[2,1,0,1,2,0],[1,2,2,0,1,2],[3,0,1,2,0,1]],[[2,1,2,0,2,1],[0,2,1,2,0,0],[3,0,0,1,1,2]],[[1,0,1,1,2,1],[3,2,0,0,0,0],[0,1,2,2,1,2]],[[0,2,1,2,2,2],[3,0,2,1,1,0],[2,1,0,0,0,1]]],[[[3,1,1,1,2,0],[2,2,2,2,1,1],[0,0,0,0,0,2]],[[0,1,1,0,0,1],[1,0,0,1,1,0],[3,2,2,2,2,2]],[[1,2,2,1,0,0],[3,0,0,0,2,1],[2,1,1,2,1,2]],[[1,1,1,1,2,2],[2,2,0,0,0,0],[0,0,2,2,1,1]],[[1,0,0,2,0,0],[3,2,1,0,1,2],[2,1,2,1,2,1]],[[1,1,2,2,0,1],[0,2,0,1,1,2],[2,0,1,0,2,0]],[[0,1,0,2,2,0],[1,2,1,0,1,1],[3,0,2,1,0,2]],[[1,2,0,2,2,2],[3,1,2,0,1,0],[2,0,1,1,0,1]],[[0,0,2,1,1,0],[2,1,0,0,0,2],[3,2,1,2,2,1]],[[0,2,1,2,0,0],[1,0,2,0,2,2],[3,1,0,1,1,1]]],[[[0,2,2,1,0,1],[2,0,1,2,1,2],[3,1,0,0,2,0]],[[3,2,1,0,0,2],[2,1,2,2,1,1],[0,0,0,1,2,0]],[[1,0,2,1,2,0],[0,1,1,0,0,2],[3,2,0,2,1,1]],[[3,0,1,1,1,1],[0,1,0,2,0,0],[2,2,2,0,2,2]],[[0,0,0,2,2,2],[1,2,1,0,1,0],[2,1,2,1,0,1]],[[3,0,2,0,0,0],[0,2,1,2,2,1],[1,1,0,1,1,2]],[[2,2,0,1,1,0],[3,0,2,2,0,2],[1,1,1,0,2,1]],[[0,0,2,0,1,1],[1,2,0,1,0,2],[2,1,1,2,0,0]],[[2,2,1,1,2,0],[1,0,0,2,0,1],[0,1,2,0,1,2]],[[3,1,1,1,2,2],[1,2,2,2,1,0],[2,0,0,0,0,1]]],[[[3,0,0,1,2,0],[2,2,1,2,1,2],[0,1,2,0,0,1]],[[3,2,0,1,1,1],[0,0,1,0,0,0],[1,1,2,2,2,2]],[[2,0,2,1,2,1],[3,1,1,0,0,2],[0,2,0,2,1,0]],[[1,0,0,2,0,2],[2,1,2,0,1,0],[3,2,1,1,2,1]],[[2,1,0,1,2,0],[3,2,2,0,0,2],[1,0,1,2,1,1]],[[2,1,1,2,0,0],[1,0,0,0,2,1],[0,2,2,1,1,2]],[[1,0,1,1,1,2],[2,2,2,2,0,1],[0,1,0,0,2,2]],[[0,1,1,1,0,1],[3,0,2,2,1,0],[1,2,0,0,2,2]],[[1,2,1,0,2,0],[3,1,0,2,1,1],[2,0,0,1,0,2]],[[2,2,0,0,1,1],[0,0,1,2,2,2],[1,1,2,1,0,0]]],[[[2,1,2,2,2,2],[3,1,1,0,0,1],[0,2,0,1,1,0]],[[0,0,2,0,0,1],[1,1,0,1,2,0],[3,2,1,2,1,2]],[[3,1,2,1,1,2],[2,2,1,0,2,1],[1,0,0,2,0,0]],[[2,0,1,1,2,2],[0,2,2,2,0,1],[3,1,0,0,1,0]],[[3,2,1,2,2,0],[0,1,0,1,0,2],[1,0,2,0,1,1]],[[0,0,1,0,2,0],[2,2,0,2,1,1],[1,1,2,1,0,2]],[[3,0,2,2,0,0],[0,2,0,0,2,2],[2,1,1,1,1,1]],[[2,2,2,1,0,0],[1,0,1,0,1,2],[0,1,0,2,2,1]],[[2,1,2,0,1,0],[1,2,1,2,0,2],[3,0,0,1,2,1]],[[2,0,0,0,0,2],[1,2,2,1,2,1],[0,1,1,2,1,0]]],[[[1,0,2,2,2,0],[3,1,1,0,1,2],[0,2,0,1,0,1]],[[3,2,1,1,1,0],[1,1,0,0,2,1],[0,0,2,2,0,2]],[[1,2,1,2,1,2],[0,0,0,0,2,0],[2,1,2,1,0,1]],[[1,1,1,1,2,0],[2,2,0,0,0,2],[3,0,2,2,1,1]],[[3,0,2,1,2,2],[2,1,0,2,1,0],[1,2,1,0,0,1]],[[3,2,0,2,2,2],[0,1,2,0,1,1],[2,0,1,1,0,0]],[[1,1,2,0,0,2],[0,2,0,1,1,0],[2,0,1,2,2,1]],[[0,1,1,1,2,2],[3,0,0,0,0,1],[2,2,2,2,1,0]],[[0,1,1,2,0,1],[1,0,0,1,1,2],[3,2,2,0,2,0]],[[1,0,2,1,1,1],[2,2,1,0,2,2],[3,1,0,2,0,0]]],[[[1,1,0,1,2,1],[2,0,2,0,0,2],[0,2,1,2,1,0]],[[0,0,2,1,1,1],[3,1,1,0,0,0],[2,2,0,2,2,2]],[[2,1,1,2,1,2],[3,0,0,1,0,1],[1,2,2,0,2,0]],[[2,1,2,0,1,0],[1,0,0,2,0,1],[0,2,1,1,2,2]],[[0,1,0,2,0,0],[3,0,2,0,2,2],[1,2,1,1,1,1]],[[0,0,0,0,1,2],[2,2,1,1,0,0],[3,1,2,2,2,1]],[[2,0,1,0,2,1],[3,1,0,1,1,0],[1,2,2,2,0,2]],[[2,0,0,1,2,0],[3,2,2,2,1,2],[0,1,1,0,0,1]],[[3,2,0,0,1,1],[1,0,1,1,0,2],[0,1,2,2,2,0]],[[3,0,1,2,2,0],[1,1,0,0,1,2],[2,2,2,1,0,1]]],[[[1,0,1,1,1,1],[0,1,2,0,2,2],[2,2,0,2,0,0]],[[0,1,0,2,1,2],[1,2,1,1,0,0],[2,0,2,0,2,1]],[[0,0,0,1,0,2],[1,1,2,0,1,0],[2,2,1,2,2,1]],[[1,2,2,2,1,2],[3,1,0,1,0,1],[0,0,1,0,2,0]],[[3,1,1,2,0,0],[2,2,2,1,1,1],[1,2,0,0,2,2]],[[2,0,1,2,1,2],[3,2,0,1,2,0],[1,1,2,0,0,1]],[[2,1,0,0,0,2],[3,0,2,2,2,2],[0,2,1,1,1,0]],[[2,1,1,1,2,2],[0,2,2,2,0,1],[3,0,0,0,1,0]],[[1,0,2,1,2,2],[2,1,0,2,1,0],[3,2,1,0,0,1]],[[1,1,0,2,2,1],[2,0,2,1,0,0],[3,2,1,0,1,2]]],[[[3,0,2,0,0,1],[1,2,0,1,2,0],[2,1,1,2,1,2]],[[0,2,2,0,1,0],[2,0,1,1,0,1],[3,1,0,2,2,2]],[[2,2,2,2,0,1],[0,1,0,1,1,0],[1,0,1,0,2,2]],[[1,1,2,1,2,0],[2,0,0,0,1,1],[0,2,1,2,0,2]],[[1,1,1,0,0,0],[3,2,2,1,1,2],[0,0,0,2,2,1]],[[2,0,2,2,2,0],[0,1,1,1,0,2],[1,2,0,0,1,1]],[[0,1,2,1,0,1],[3,0,1,2,1,0],[2,2,0,0,2,2]],[[3,0,0,1,0,2],[0,2,1,0,2,0],[1,1,1,2,1,1]],[[1,2,0,2,0,0],[2,0,1,1,1,2],[3,1,2,0,2,1]],[[1,0,2,2,1,2],[3,2,1,1,2,1],[2,1,0,0,0,0]]],[[[3,2,1,1,1,2],[1,0,2,2,2,0],[0,1,0,0,0,1]],[[2,2,0,0,2,0],[0,1,2,2,1,2],[1,0,1,1,0,1]],[[0,2,1,0,2,1],[2,1,2,1,0,2],[1,0,0,2,1,0]],[[3,1,0,1,0,0],[0,0,1,2,2,2],[1,2,2,0,1,1]],[[3,0,1,0,0,2],[0,2,2,1,1,0],[2,1,0,2,2,1]],[[1,1,2,1,2,1],[2,0,0,0,1,2],[3,2,1,2,0,0]],[[3,2,2,0,2,2],[0,0,0,1,1,1],[2,1,1,2,0,0]],[[2,2,1,2,1,1],[0,0,2,0,0,0],[1,1,0,1,2,2]],[[3,1,2,0,1,1],[1,2,0,2,0,2],[2,0,1,1,2,0]],[[1,1,1,0,1,0],[3,0,0,2,2,1],[2,2,2,1,0,2]]],[[[2,2,0,0,0,1],[0,1,2,2,1,0],[1,2,1,1,2,2]],[[0,0,2,1,1,1],[3,1,1,0,0,0],[2,2,0,2,2,2]],[[3,0,2,1,2,1],[1,2,1,2,1,0],[0,1,0,0,0,2]],[[3,2,1,2,0,1],[2,1,2,1,1,2],[0,0,0,0,2,0]],[[3,2,0,1,1,0],[1,1,2,0,2,2],[0,0,1,2,0,1]],[[2,0,1,1,0,0],[3,1,2,2,2,1],[0,2,0,0,1,2]],[[3,0,1,0,1,2],[1,1,0,1,0,1],[2,2,2,0,2,0]],[[0,2,2,1,0,2],[2,1,1,0,1,1],[1,0,0,2,2,0]],[[1,2,2,0,0,0],[0,1,1,2,2,1],[3,0,0,1,1,2]],[[1,2,0,0,1,1],[0,1,1,1,2,0],[2,0,2,2,0,2]]],[[[2,1,0,0,1,2],[1,0,1,2,2,1],[0,2,2,1,0,0]],[[2,1,0,2,0,1],[3,0,2,1,2,2],[1,2,1,0,1,0]],[[3,1,1,2,1,0],[1,2,0,0,2,2],[0,0,1,1,0,1]],[[3,0,0,2,1,2],[2,1,1,1,2,0],[1,2,2,0,0,1]],[[3,1,1,0,2,1],[2,0,2,1,1,0],[1,2,0,2,0,2]],[[3,2,0,1,1,1],[0,1,2,2,2,0],[2,0,1,0,0,2]],[[1,1,1,1,0,2],[2,2,2,2,2,1],[0,0,0,0,2,0]],[[3,0,0,2,0,0],[2,2,1,1,2,2],[0,1,2,0,1,1]],[[3,1,2,0,0,0],[0,2,1,2,1,2],[1,0,0,1,2,1]],[[3,2,1,0,2,1],[1,0,2,2,1,0],[0,1,0,1,0,2]]],[[[3,2,2,0,1,2],[0,1,0,1,0,0],[2,0,1,2,2,1]],[[0,2,0,1,1,1],[2,1,2,2,0,2],[1,0,1,0,2,0]],[[0,0,2,0,2,1],[3,1,1,1,0,2],[2,2,0,2,1,0]],[[1,1,1,1,1,1],[0,2,0,0,2,2],[3,0,2,2,0,0]],[[1,1,0,0,1,0],[3,2,1,2,2,1],[2,0,2,1,0,2]],[[2,2,1,0,0,0],[0,0,2,2,1,2],[3,1,0,1,2,1]],[[0,2,1,1,0,0],[2,1,2,0,1,1],[1,0,0,2,2,2]],[[2,1,0,0,2,2],[1,2,2,2,0,1],[3,0,1,1,1,0]],[[3,0,0,0,0,1],[1,2,2,1,2,0],[0,1,1,2,1,2]],[[2,0,0,1,1,1],[1,2,1,0,0,2],[0,1,2,2,2,0]]],[[[3,2,1,1,2,0],[1,1,2,2,1,1],[2,0,0,0,0,2]],[[1,0,0,2,0,0],[3,1,2,1,2,2],[0,2,1,0,1,1]],[[3,2,0,2,0,1],[1,1,1,1,1,2],[2,0,2,0,2,0]],[[1,2,2,0,2,1],[2,1,0,1,1,0],[0,0,1,2,0,2]],[[3,2,0,0,1,2],[0,1,2,2,0,0],[2,0,1,1,2,1]],[[1,2,2,1,0,2],[3,0,1,2,1,1],[0,1,0,0,2,0]],[[3,1,1,0,0,0],[1,0,0,1,2,1],[2,2,2,2,1,2]],[[2,2,0,2,2,1],[1,1,1,0,1,2],[0,0,2,1,0,0]],[[2,2,1,1,0,1],[0,1,0,2,2,2],[3,0,2,0,1,0]],[[2,1,2,0,0,1],[0,0,0,1,1,1],[1,2,1,2,2,0]]]],"derror":0.19674,"cuotas":[["$17.500","$23.500","$29.000","$35.000"],["$35.000","$46.500","$58.500","$70.000"],["$52.500","$70.000","$87.500","$105.000"]]};
@@ -567,7 +571,14 @@ function guardar(){
   try { localStorage.setItem(LS, JSON.stringify(S)); } catch(e){ /* modo privado */ }
 }
 function cargar(){
-  try { const x = localStorage.getItem(LS); return x ? JSON.parse(x) : null; }
+  try {
+    const x = localStorage.getItem(LS);
+    const e = x ? JSON.parse(x) : null;
+    /* Un estado guardado por otra versión de la página apunta a pantallas que ya no están en el
+       mismo lugar (la del 26/11 insertó una): se descarta y la persona empieza de nuevo. */
+    if (e && e.version !== CONFIG.version) { localStorage.removeItem(LS); return null; }
+    return e;
+  }
   catch(e){ return null; }
 }
 
@@ -785,7 +796,25 @@ function escala(campo, texto, izq, der){
   return h + `</div><div class="extremos"><span>${izq}</span><span>${der}</span></div></div>`;
 }
 
-window.setR = (c,v) => { S.r[c] = v; guardar(); pintar(); };
+/* Campos que pertenecen a una sola rama. Al cambiar la respuesta que abre la rama, los de la
+   otra se borran acá mismo y no en la validación de su pantalla, que no corre si la pantalla
+   dejó de ser visible (volver atrás y cambiar Sí por No dejaba el estado con campos ajenos). */
+const CAMPOS_HIZO_SI = ["ultima_vez","k_dia","k_finde","k_largas","k_propias","empresas","k_plan",
+  "k_guiadas","tipo_salida","con_quien","como_eligio","contrato_2a","cancelo_tramo",
+  "reprogramo_tramo","sin_fecha_tramo"];
+const CAMPOS_HIZO_NO = ["quiso","impidio","prob_12m","no_interes","probaria"];
+function limpiarRama(c, v){
+  if (c === "hizo" && S.r.hizo !== v) {
+    (v === "Sí" ? CAMPOS_HIZO_NO : CAMPOS_HIZO_SI).forEach(k => delete S.r[k]);
+    /* La rama corta ve seis tareas: las elecciones de la séptima en adelante sobran. */
+    if (v === "No" && S.elecciones.length > 6) S.elecciones = S.elecciones.slice(0, 6);
+  }
+  if (c === "quiso" && S.r.quiso !== v) {
+    (v === "No, nunca me lo planteé" ? ["impidio","prob_12m"] : ["no_interes","probaria"])
+      .forEach(k => delete S.r[k]);
+  }
+}
+window.setR = (c,v) => { limpiarRama(c, v); S.r[c] = v; guardar(); pintar(); };
 window.togR = (c,v) => {
   const a = S.r[c] || [];
   if (a.includes(v)) { S.r[c] = a.filter(x=>x!==v); }
@@ -796,6 +825,11 @@ window.togR = (c,v) => {
     S.r[c] = a.length >= tope ? a.slice(1).concat([v]) : a.concat([v]);
   }
   guardar(); pintar();
+};
+window.setTxt = (c,v,max) => {
+  v = String(v || "").slice(0, max || 400).trim();
+  if (v) S.r[c] = v; else delete S.r[c];
+  guardar();
 };
 window.setNum = (c,v,min,max) => {
   /* Se limpian puntos, comas, espacios y el signo de pesos: "$ 1.200.000" -> 1200000.
@@ -847,11 +881,20 @@ const PASOS = [];
 function P(render, valida, extra){
   PASOS.push(Object.assign({render, valida, visible: () => true, seccion: ""}, extra || {}));
 }
-/* Quien no hizo salidas y nunca se lo planteó no es mercado de un plan de montaña: se le
-   agradece y la encuesta termina. Quien no hizo pero quiso es la demanda latente: ve una
-   versión corta del experimento, seis pantallas en lugar de trece, y se analiza aparte. */
+/* Desde el 26/11 el filtro es "alguna vez", no "en los últimos dos años": la experiencia
+   de quien hizo montaña hace tres u ocho años vale igual para elegir entre planes, y los
+   conteos de los últimos doce meses (que son la base de H1 y H3) los responde con ceros.
+   Quien nunca hizo y nunca se lo planteó no ve el experimento, pero dice por qué no le
+   atrae y si probaría, y deja edad y lugar: también es un posible cliente. Quien nunca
+   hizo pero quiso es la demanda latente: ve una versión corta del experimento, seis
+   pantallas en lugar de trece, y se analiza aparte. */
 function fuera(){ return S.r.hizo === "No" && S.r.quiso === "No, nunca me lo planteé"; }
 function nTareas(){ return S.r.hizo === "No" ? 6 : 13; }
+/* Salió en los últimos doce meses (se sabe desde la pantalla 1). */
+function reciente(){ return S.r.hizo === "Sí" && S.r.ultima_vez === "En los últimos doce meses"; }
+/* "Como hoy" solo vale para quien además compró alguna salida guiada en esos doce meses:
+   a quien salió solo por su cuenta no se le puede decir que sigue "comprando como hoy". */
+function compraReciente(){ return reciente() && (S.r.k_guiadas || 0) > 0; }
 function pieEstandar(txt, accion, sinVolver){
   return `<div class="aviso-err" id="aviso-pie" role="alert" hidden></div>
     <div class="acciones">
@@ -918,20 +961,27 @@ window.marcarCons = (ok) => {
 
 /* ---- 1. filtro ------------------------------------------------------- */
 P(() => `
-  <h2>¿Hiciste montaña últimamente?</h2>
-  <p class="intro">En los últimos dos años, ¿hiciste alguna salida de montaña, trekking o
-  travesía de al menos un día completo?</p>
+  <h2>¿Hiciste montaña alguna vez?</h2>
+  <p class="intro">¿Alguna vez hiciste una salida de montaña, trekking o travesía de al menos
+  un día completo?</p>
   <div class="dos">
     <label class="grande${S.r.hizo==="Sí"?" on":""}">
       <input type="radio" name="hizo" ${S.r.hizo==="Sí"?"checked":""}
         onchange="setR('hizo','Sí')">
-      ${ico("si",26)}<b>Sí, hice</b><em>Una o varias</em></label>
+      ${ico("si",26)}<b>Sí, hice</b><em>Una o varias, en cualquier momento</em></label>
     <label class="grande${S.r.hizo==="No"?" on":""}">
       <input type="radio" name="hizo" ${S.r.hizo==="No"?"checked":""}
         onchange="setR('hizo','No')">
-      ${ico("no",26)}<b>No, ninguna</b><em>En estos dos años</em></label>
+      ${ico("no",26)}<b>No, nunca</b><em>Ninguna hasta hoy</em></label>
   </div>
-`, () => req("hizo","Elegí una de las dos."), {seccion:"Tus salidas"});
+  ${S.r.hizo === "Sí" ? radio("ultima_vez","¿Cuándo fue la última?",
+     ["En los últimos doce meses","Hace entre uno y dos años","Hace más de dos años"], "fichas") : ""}
+`, () => {
+  if (S.r.hizo === undefined) return fallo("Elegí una de las dos.");
+  if (S.r.hizo === "Sí" && S.r.ultima_vez === undefined) return fallo("Falta cuándo fue la última.");
+  if (S.r.hizo === "No") delete S.r.ultima_vez;
+  return bien();
+}, {seccion:"Tus salidas"});
 
 /* ---- 2. rama de quien NO hizo ---------------------------------------- */
 P(() => `
@@ -944,10 +994,19 @@ P(() => `
       "No conocía empresas o guías de confianza","No tenía tiempo","Otra cosa"], "fichas")}
   ${escala("prob_12m","¿Qué tan probable es que hagas una salida guiada en los próximos doce meses?",
      "1 = imposible", "10 = segurísimo")}` : ""}
+  ${fuera() ? `${check("no_interes","¿Por qué no? Podés marcar varias.",
+     ["No me llama la atención","Me parece muy exigente físicamente",
+      "Prefiero otro tipo de viajes o actividades","No conozco a nadie que lo haga",
+      "Me parece caro","Nunca surgió la ocasión","Otra cosa"], "fichas")}
+  ${radio("probaria","Si alguien de confianza te invitara a una salida tranquila de un día, con guía, ¿irías?",
+     ["Sí, iría","Tal vez","No"], "fichas")}` : ""}
 `, () => {
   if (S.r.quiso === undefined) return fallo("Falta la primera pregunta.");
   if (!fuera() && !(S.r.impidio && S.r.impidio.length)) return fallo("Marcá al menos una cosa que te lo impidió.");
   if (!fuera() && S.r.prob_12m === undefined) return fallo("Falta qué tan probable es que hagas una salida.");
+  if (fuera() && !(S.r.no_interes && S.r.no_interes.length)) return fallo("Marcá al menos un motivo.");
+  if (fuera() && S.r.probaria === undefined) return fallo("Falta si irías a una salida de un día.");
+  if (fuera()) { delete S.r.impidio; delete S.r.prob_12m; } else { delete S.r.no_interes; delete S.r.probaria; }
   return bien();
 }, {visible: () => S.r.hizo === "No", seccion:"Tus salidas"});
 
@@ -955,7 +1014,7 @@ P(() => `
 P(() => `
   <h2>Los últimos doce meses</h2>
   <p class="intro">¿Cuántas salidas hiciste en los últimos doce meses? Si no te acordás exacto,
-  poné tu mejor estimación.</p>
+  poné tu mejor estimación.${reciente() ? "" : " Como tu última salida fue hace más de un año, poné 0 en todas."}</p>
   ${num("k_dia","Con guía o empresa, de <b>un solo día</b>",0,40)}
   ${num("k_finde","Con guía o empresa, de <b>fin de semana</b> (dos o tres días)",0,40)}
   ${num("k_largas","Con guía o empresa, de <b>cuatro días o más</b>",0,40)}
@@ -974,9 +1033,49 @@ P(() => `
   return bien();
 }, {visible: () => S.r.hizo === "Sí", seccion:"Tus salidas"});
 
+/* ---- 4b. cómo elige: tipo de salida, compañía y canal (solo quien hizo) ---------- */
+/* Agregada el 26/11 para la lectura de producto: qué hace, con quién y cómo llega a una
+   empresa o guía. Una pantalla, tres preguntas; no toca el experimento. */
+P(() => `
+  <h2>Cómo son tus salidas</h2>
+  ${check("tipo_salida","¿Qué tipo de salidas hiciste? Podés marcar varias.",
+    [{v:"Trekking de un día", l:"Trekking de un día"},
+     {v:"Trekking de varios días, con refugio o carpa", l:"Varios días, con refugio o carpa"},
+     {v:"Ascenso a un cerro o cumbre", l:"Ascenso a un cerro o cumbre"},
+     {v:"Alta montaña con equipo técnico", l:"Alta montaña con equipo técnico"},
+     {v:"Travesía larga, de una semana o más", l:"Travesía de una semana o más"},
+     {v:"Otra cosa", l:"Otra cosa"}], "fichas")}
+  ${check("con_quien","La última vez, ¿con quién fuiste? Podés marcar varias.",
+    [{v:"Solo o sola", l:"Solo o sola, sin grupo"},{v:"Con mi pareja", l:"Con mi pareja"},
+     {v:"Con amigos o familia", l:"Con amigos o familia"},
+     {v:"Con un grupo armado por una empresa o guía", l:"Con un grupo de una empresa o guía"},
+     {v:"Con un club o un grupo habitual", l:"Con un club o grupo habitual"}], "fichas")}
+  ${check("como_eligio","La última vez que fuiste con guía o empresa, ¿cómo la encontraste? Podés marcar varias.",
+    [{v:"Me la recomendó alguien", l:"Me la recomendó alguien"},
+     {v:"La vi en Instagram u otra red", l:"La vi en Instagram u otra red"},
+     {v:"La busqué en Google", l:"La busqué en Google"},
+     {v:"Ya la conocía de antes", l:"Ya la conocía de antes"},
+     {v:"Por un club o un grupo", l:"Por un club o un grupo"},
+     {v:"Otra cosa", l:"Otra cosa"},
+     {v:"Nunca fui con guía o empresa", l:"Nunca fui con guía o empresa"}], "fichas")}
+`, () => {
+  if (!(S.r.tipo_salida && S.r.tipo_salida.length)) return fallo("Marcá al menos un tipo de salida.");
+  const q = S.r.con_quien || [];
+  if (!q.length) return fallo("Marcá con quién fuiste la última vez.");
+  if (q.includes("Solo o sola") && q.length > 1) return fallo("Si fuiste solo o sola, dejá solo esa opción.");
+  const c = S.r.como_eligio || [];
+  if (!c.length) return fallo("Marcá cómo la encontraste, o que nunca fuiste con guía o empresa.");
+  if (c.includes("Nunca fui con guía o empresa") && c.length > 1)
+    return fallo("Si nunca fuiste con guía o empresa, dejá solo esa opción.");
+  if (c.includes("Nunca fui con guía o empresa") && (S.r.k_guiadas || 0) > 0)
+    return fallo("En la pantalla anterior pusiste salidas con guía o empresa en los últimos doce meses.");
+  return bien();
+}, {visible: () => S.r.hizo === "Sí", seccion:"Tus salidas"});
+
 /* ---- 5. cancelaciones ------------------------------------------------ */
 P(() => `
   <h2>Cancelaciones y fechas</h2>
+  ${S.r.ultima_vez === "Hace más de dos años" ? `<p class="intro">Si en estos dos años no contrataste ninguna, poné 0.</p>` : ""}
   ${num("contrato_2a","En los <b>últimos dos años</b>, ¿cuántas salidas con guía o empresa contrataste en total?",0,60)}
   ${(S.r.contrato_2a > 0) ? `${radio("cancelo_tramo","De esas, ¿cuántas <b>te canceló la empresa</b> y no se hicieron?",
     [{v:"Ninguna", l:"Ninguna"},{v:"1", l:"1"},{v:"2", l:"2"},
@@ -1046,8 +1145,8 @@ P(() => `
   <div class="caja tenue">
     <p class="rotulo">Siempre podés no contratar ninguno</p>
     <p style="font-size:.9rem;margin-top:7px;line-height:1.42">En ese caso
-    ${S.r.hizo === "Sí" ? "seguís comprando salida por salida, como hoy"
-                        : "seguís pagando cada salida cuando la hagas"}.
+    ${compraReciente() ? "seguís comprando salida por salida, como hoy"
+                       : "pagás cada salida cuando la hagas"}.
     Para comparar: una salida de dos días en las sierras, con guía, sale hoy
     <b>$280.000 al contado</b> o <b>3 cuotas de $103.000</b>, en grupo de hasta 15 personas, y
     si no se junta gente se cancela.</p>
@@ -1127,18 +1226,18 @@ function pintarTarea(i){
     }
   });
 
-  /* 🔴 El texto cambia según la rama. Decirle "como hacés hoy" a alguien que no hizo
-     ninguna salida en dos años es falso, y la proporción de no compra es justamente el
+  /* 🔴 El texto cambia según la rama. Decirle "como hacés hoy" a alguien que no compró
+     ninguna salida guiada en los últimos doce meses es falso, y la proporción de no compra es justamente el
      estadístico con el que se prueba la tercera hipótesis: si la frase no aplica, el dato
      no mide lo que se cree que mide. */
-  const practica = S.r.hizo === "Sí";
+  const practica = compraReciente();
   const compra = yaEl.compraria;
   /* El recordatorio de no compra tiene que estar en TODAS las pantallas, no una
      vez: es lo que sostiene la interpretación de la proporción de no compra. Lo
      que se movió a la glosa previa es la DESCRIPCIÓN de precios de la alternativa
      de hoy, que es constante y ocupaba 92 px en cada una de las trece pantallas. */
   const alterna = practica ? "seguís comprando salida por salida, como hoy"
-                           : "seguís pagando cada salida cuando la hagas";
+                           : "pagás cada salida cuando la hagas";
 
   return `
   <div class="cab-tarea">
@@ -1206,12 +1305,8 @@ P(() => `
 P(() => `
   <h2>Los próximos doce meses</h2>
   ${num("k_intencion","Pensando en los <b>próximos doce meses</b>, ¿cuántas salidas con guía o empresa pensás hacer, contando también las de un día?",0,40)}
-  ${S.r.hizo === "No" ? `${radio("alguna_vez_guiada",
-      "¿Alguna vez hiciste una salida con guía o empresa, aunque haya sido hace más de dos años?",
-      ["Sí","No"], "fichas")}` : ""}
 `, () => {
   if (S.r.k_intencion === undefined) return fallo("Falta el número. Si no pensás hacer ninguna, poné 0.");
-  if (S.r.hizo === "No" && S.r.alguna_vez_guiada === undefined) return fallo("Falta la segunda pregunta.");
   return bien();
 }, {visible: () => !fuera(), seccion:"Los planes"});
 
@@ -1366,7 +1461,7 @@ P(() => `
   if (S.r.region === undefined) return fallo("Falta dónde vivís.");
   if (S.r.edad === undefined) return fallo("Falta tu edad.");
   return bien();
-}, {visible: () => !fuera(), seccion:"Sobre vos"});
+}, {seccion:"Sobre vos"});
 
 /* ---- 28. perfil: género, estudios y casa --------------------------- */
 P(() => `
@@ -1430,6 +1525,13 @@ P(() => `
      {v:"Me la mandó alguien que conozco", l:"Me la mandó un conocido"},
      {v:"Un grupo o comunidad de montaña", l:"Un grupo de montaña"},
      "Otro lugar"], "fichas") : ""}
+  <div class="bloque">
+    <span class="preg">${fuera() ? "¿Algo más que quieras decir sobre las salidas de montaña?"
+                              : "¿Algo más que quieras decir sobre las salidas de montaña o sobre un plan así?"}</span>
+    <p class="micro" style="margin:0">Opcional. No pongas nombres ni datos de contacto.</p>
+    <textarea class="txt-libre" rows="3" maxlength="400" placeholder="Escribí lo que quieras"
+      oninput="setTxt('comentario', this.value, 400)">${esc(S.r.comentario || "")}</textarea>
+  </div>
 `, () => {
   if (S.r.cuota_otra === undefined) return fallo("Falta si pagás hoy alguna cuota mensual.");
   if (S.r.club === undefined) return fallo("Falta si pertenecés a un club de montaña.");
